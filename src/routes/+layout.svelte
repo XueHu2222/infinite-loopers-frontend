@@ -10,7 +10,7 @@
 
 <Menu items={[
 	{ label: 'Home', href: '/' },
-	{ label: 'Task', href: '/task' }
+	{ label: 'Quest Log', href: '/quest-log' }
 ]} />
 
 <svelte:head>
