@@ -1,7 +1,6 @@
 <script>
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
-
 	import Menu from '$lib/components/Menu.svelte';
 
 	let { children } = $props();
