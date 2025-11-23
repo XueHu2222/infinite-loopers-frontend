@@ -18,7 +18,7 @@
 				<a
 					href={item.href}
 					class="px-1 text-lg
-          {currentPath === item.href
+					{currentPath === item.href
 						? 'font-semibold text-[#3E2612]'
 						: 'text-[#4F3117] hover:text-[#7A5C3E]'}"
 				>
@@ -26,10 +26,21 @@
 				</a>
 			{/each}
 		</nav>
-		<button
-			class="ml-4 rounded bg-[#4F3117] px-4 py-1 font-medium text-[#EEE9E1] hover:bg-[#3E2612]"
-		>
-			Login
-		</button>
+
+		<div class="flex items-center gap-3">
+			<a
+				href="/signup"
+				class="rounded border-2 border-[#4F3117] bg-[#EEE9E1] px-4 py-1 font-medium text-[#4F3117] hover:bg-[#E5DFD3]"
+			>
+				Sign Up
+			</a>
+
+			<a
+				href="/signin"
+				class="rounded bg-[#4F3117] px-4 py-1 font-medium text-[#EEE9E1] hover:bg-[#3E2612]"
+			>
+				Login
+			</a>
+		</div>
 	</div>
 </header>
