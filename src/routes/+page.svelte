@@ -31,6 +31,7 @@
 	];
 </script>
 
+<!-- Hero section -->
 <section class="flex flex-col-reverse items-center justify-between bg-[#E8DCCD] px-6 py-12 sm:px-28 sm:py-20 lg:flex-row">
 	<div class="mt-6 text-center lg:mt-0 lg:text-left">
 		<h1 class="font-['IM_Fell_Great_Primer_SC'] text-3xl tracking-[-0.5%] text-[#5a3e1b] sm:text-4xl md:text-5xl">
@@ -54,6 +55,7 @@
     </div>
 </section>
 
+<!-- Reviews section -->
 <section class="px-6 py-16 sm:px-12 lg:px-28 lg:py-24 bg-[#FAF6F0]">
 	<h2 class="text-center font-['IM_Fell_Great_Primer_SC'] text-4xl sm:text-5xl text-[#4F3117] mb-16">
 		Reviews From Fellow Adventurers
@@ -88,21 +90,21 @@
 	</div>
 </section>
 
+<!-- Features section -->
 <section class="relative bg-[#E8DCCD] py-20 px-6 sm:px-12 lg:px-28 overflow-hidden">
-	<div class="max-w-7xl mx-auto text-center">
-		<h2 class="font-['IM_Fell_Great_Primer_SC'] text-4xl sm:text-5xl lg:text-6xl text-[#4F3117] mb-4">
+		<h2 class="font-['IM_Fell_Great_Primer_SC'] text-4xl text-center sm:text-5xl lg:text-6xl text-[#4F3117] mb-4">
 			Questify your everyday
 		</h2>
 
-		<p class="font-['IM_Fell_Great_Primer_SC'] text-[#4F3117] text-lg sm:text-xl lg:text-2xl max-w-3xl mx-auto leading-tight tracking-tight">
-			Transform your to-do list into an epic journey. Complete missions,<br class="hidden sm:block">
+		<p class="font-['IM_Fell_Great_Primer_SC'] text-[#4F3117] text-center text-lg sm:text-xl lg:text-2xl leading-tight tracking-tight">
+			Transform your to-do list into an epic journey. Complete missions,<br/>
 			unlock achievements, and watch your real-world progress level you up.
 		</p>
 
-		<div class="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-6 mt-20">
-			<div class="flex flex-col gap-8 lg:gap-10">
+		<div class="flex flex-col lg:flex-row items-center justify-center gap-2 mt-20 w-full">
+			<div class="flex flex-col gap-8 lg:gap-10 w-full lg:w-auto">
 				{#each features.slice(0,3) as feature}
-					<div class="flex items-center justify-center gap-5 bg-[#FAF6F0] rounded-full px-8 py-6 shadow-xl">
+					<div class="flex items-center justify-center gap-5 bg-[#FAF6F0] shadow-xl rounded-full px-15 py-6">
 						<img src={coin} alt="coin" class="w-11 h-11" />
 						<span class="font-['IM_Fell_Great_Primer_SC'] text-xl sm:text-2xl lg:text-3xl text-[#4F3117]">
 							{feature}
@@ -111,16 +113,12 @@
 				{/each}
 			</div>
 
-			<img 
-				src={sword} 
-				alt="Sword in a stone."
-				class="w-52 sm:w-72 lg:w-96 xl:w-md -mt-16 sm:-mt-20 lg:-mt-12 z-30 pointer-events-none drop-shadow-2xl"
-			/>
+			<img src={sword} alt="sword" class="w-52 sm:w-72 lg:w-96 drop-shadow-[0px_5px_5px_rgba(0,0,0,0.5)]"/>
 
-			<div class="flex flex-col gap-8 lg:gap-10">
+			<div class="flex flex-col gap-8 lg:gap-10 w-full lg:w-auto">
 				{#each features.slice(3) as feature}
-					<div class="flex items-center justify-center gap-5 bg-[#FAF6F0] rounded-full px-8 py-6 shadow-xl">
-						<img src={coin} alt="Gold coin." class="w-11 h-11" />
+					<div class="flex items-center justify-center gap-5 bg-[#FAF6F0] rounded-full px-15 py-6 shadow-xl">
+						<img src={coin} alt="coin" class="w-11 h-11" />
 						<span class="font-['IM_Fell_Great_Primer_SC'] text-xl sm:text-2xl lg:text-3xl text-[#4F3117]">
 							{feature}
 						</span>
@@ -128,5 +126,4 @@
 				{/each}
 			</div>
 		</div>
-	</div>
 </section>
