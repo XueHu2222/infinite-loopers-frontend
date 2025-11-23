@@ -3,6 +3,8 @@
 	import star from '$lib/assets/star.png';
 	import parchment from '$lib/assets/review-panel.png';
 	import ratingStar from '$lib/assets/review-star.png';
+	import coin from '$lib/assets/coin.png';
+	import sword from '$lib/assets/sword.png';
 
 	const reviews = [
 		{
@@ -17,7 +19,16 @@
 			quote: "For the first time ever, I don't dread my to-do list. This app just totally gets me.",
 			name: "Iris"
 		}
-	]
+	];
+
+	const features = [
+		"Boost Motivation",
+		"Stay Consistent",
+		"Track Your Growth",
+		"Grow With Purpose",
+		"Focus With Ease",
+		"Feel In Control"
+	];
 </script>
 
 <section class="flex flex-col-reverse items-center justify-between bg-[#E8DCCD] px-6 py-12 sm:px-28 sm:py-20 lg:flex-row">
@@ -44,7 +55,7 @@
 </section>
 
 <section class="px-6 py-16 sm:px-12 lg:px-28 lg:py-24 bg-[#FAF6F0]">
-	<h2 class="text-center font-['IM_Fell_Great_Primer_SC'] text-4xl sm:text-5xl text-[#5a3e1b] mb-16">
+	<h2 class="text-center font-['IM_Fell_Great_Primer_SC'] text-4xl sm:text-5xl text-[#4F3117] mb-16">
 		Reviews From Fellow Adventurers
 	</h2>
 
@@ -58,23 +69,64 @@
 				/>
 
 				<div class="absolute inset-0 flex flex-col justify-center items-center px-8 pt-16 pb-10 text-center">
-					<!-- Stars -->
 					<div class="flex gap-1 mb-6">
 						{#each Array(5) as _}
 							<img src={ratingStar} alt="star" class="w-8 h-8 sm:w-9 sm:h-9 drop-shadow-sm" />
 						{/each}
 					</div>
 
-					<p class="text-[#4a3728] font-['IM_Fell_Great_Primer_SC'] 
-					           text-lg sm:text-xl md:text-2xl leading-tight tracking-wider max-w-xs mx-auto">
+					<p class="text-[#4F3117] font-['IM_Fell_Great_Primer_SC'] text-lg sm:text-xl md:text-2xl leading-tight tracking-tight max-w-xs mx-auto">
 						{review.quote}
 					</p>
 
-					<p class="mt-6 text-[#6b5540] font-['IM_Fell_Great_Primer_SC'] text-xl sm:text-2xl">
+					<p class="mt-6 text-[#4F3117] font-['IM_Fell_Great_Primer_SC'] text-xl sm:text-2xl">
 						- {review.name}
 					</p>
 				</div>
 			</div>
 		{/each}
+	</div>
+</section>
+
+<section class="relative bg-[#E8DCCD] py-20 px-6 sm:px-12 lg:px-28 overflow-hidden">
+	<div class="max-w-7xl mx-auto text-center">
+		<h2 class="font-['IM_Fell_Great_Primer_SC'] text-4xl sm:text-5xl lg:text-6xl text-[#4F3117] mb-4">
+			Questify your everyday
+		</h2>
+
+		<p class="font-['IM_Fell_Great_Primer_SC'] text-[#4F3117] text-lg sm:text-xl lg:text-2xl max-w-3xl mx-auto leading-tight tracking-tight">
+			Transform your to-do list into an epic journey. Complete missions,<br class="hidden sm:block">
+			unlock achievements, and watch your real-world progress level you up.
+		</p>
+
+		<div class="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-6 mt-20">
+			<div class="flex flex-col gap-8 lg:gap-10">
+				{#each features.slice(0,3) as feature}
+					<div class="flex items-center justify-center gap-5 bg-[#FAF6F0] rounded-full px-8 py-6 shadow-xl">
+						<img src={coin} alt="coin" class="w-11 h-11" />
+						<span class="font-['IM_Fell_Great_Primer_SC'] text-xl sm:text-2xl lg:text-3xl text-[#4F3117]">
+							{feature}
+						</span>
+					</div>
+				{/each}
+			</div>
+
+			<img 
+				src={sword} 
+				alt="Sword in a stone."
+				class="w-52 sm:w-72 lg:w-96 xl:w-md -mt-16 sm:-mt-20 lg:-mt-12 z-30 pointer-events-none drop-shadow-2xl"
+			/>
+
+			<div class="flex flex-col gap-8 lg:gap-10">
+				{#each features.slice(3) as feature}
+					<div class="flex items-center justify-center gap-5 bg-[#FAF6F0] rounded-full px-8 py-6 shadow-xl">
+						<img src={coin} alt="Gold coin." class="w-11 h-11" />
+						<span class="font-['IM_Fell_Great_Primer_SC'] text-xl sm:text-2xl lg:text-3xl text-[#4F3117]">
+							{feature}
+						</span>
+					</div>
+				{/each}
+			</div>
+		</div>
 	</div>
 </section>
