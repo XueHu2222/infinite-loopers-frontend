@@ -3,14 +3,41 @@
 	let email = '';
 	let password = '';
 	let confirmPassword = '';
-	
-	function handleSignUp() {
+	let errorMessage = '';
+	let isLoading = false;
+
+	async function handleSignUp() {
 		if (password !== confirmPassword) {
-			alert('Passwords do not match!');
+			errorMessage = 'Passwords do not match!';
 			return;
 		}
-		
-		console.log('Sign up:', { username, email, password });
+
+		isLoading = true;
+		errorMessage = '';
+
+		try {
+			const response = await fetch('http://localhost:3012/auth/register', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ username, email, password })
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				alert('Registration successful! Please sign in.');
+				window.location.href = '/signin';
+			} else {
+				errorMessage = data.message || 'Registration failed';
+			}
+		} catch (error) {
+			errorMessage = 'Failed to connect to server';
+			console.error('Registration error:', error);
+		} finally {
+			isLoading = false;
+		}
 	}
 </script>
 
@@ -19,6 +46,11 @@
 		<!-- Sign Up Title -->
 		<h1 class="mb-8 text-center font-serif text-3xl text-[#4F3117]">SIGN UP</h1>
 
+		{#if errorMessage}
+			<div class="mb-4 rounded bg-red-100 p-3 text-red-700">
+				{errorMessage}
+			</div>
+		{/if}
 		<form on:submit|preventDefault={handleSignUp} class="space-y-6">
 			<!-- Username Field -->
 			<div>
@@ -37,9 +69,7 @@
 
 			<!-- Email Field -->
 			<div>
-				<label for="email" class="mb-2 block text-sm font-medium text-[#4F3117]">
-					EMAIL
-				</label>
+				<label for="email" class="mb-2 block text-sm font-medium text-[#4F3117]"> EMAIL </label>
 				<input
 					type="email"
 					id="email"
@@ -83,9 +113,10 @@
 			<!-- Sign Up Button -->
 			<button
 				type="submit"
-				class="w-full rounded bg-[#4F3117] py-2.5 font-medium text-[#EEE9E1] transition hover:bg-[#3E2612]"
+				disabled={isLoading}
+				class="w-full rounded bg-[#4F3117] py-2.5 font-medium text-[#EEE9E1] transition hover:bg-[#3E2612] disabled:opacity-50"
 			>
-				SIGN UP
+				{isLoading ? 'SIGNING UP...' : 'SIGN UP'}
 			</button>
 		</form>
 

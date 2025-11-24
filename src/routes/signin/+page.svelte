@@ -1,28 +1,63 @@
 <script>
 	import knight from '$lib/assets/knight.png';
-	
+
 	let email = '';
 	let password = '';
 
-	function handleSignIn() {
-		// TODO: Connect to backend API
-		console.log('Sign in:', { email, password });
+	let errorMessage = '';
+	let isLoading = false;
+
+	async function handleSignIn() {
+		isLoading = true;
+		errorMessage = '';
+
+		try {
+			const response = await fetch('http://localhost:3012/auth/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ email, password })
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				// Store user data in localStorage
+				localStorage.setItem('user', JSON.stringify(data.user));
+
+				// Redirect to home or dashboard
+				window.location.href = '/';
+			} else {
+				errorMessage = data.message || 'Login failed';
+			}
+		} catch (error) {
+			errorMessage = 'Failed to connect to server';
+			console.error('Login error:', error);
+		} finally {
+			isLoading = false;
+		}
 	}
 </script>
 
 <div class="flex min-h-screen items-center justify-center bg-[#EEE9E1]">
-	<div class="relative w-full max-w-2xl rounded-lg border-4 border-[#4F3117] bg-[#F5F0E8] p-12 shadow-lg">
+	<div
+		class="relative w-full max-w-2xl rounded-lg border-4 border-[#4F3117] bg-[#F5F0E8] p-12 shadow-lg"
+	>
 		<!-- Sign In Title -->
 		<h1 class="mb-8 text-center font-serif text-4xl text-[#4F3117]">SIGN IN</h1>
 
 		<div class="flex items-center gap-8">
 			<!-- Form Section -->
 			<form on:submit|preventDefault={handleSignIn} class="flex-1 space-y-6">
+				{#if errorMessage}
+					<div class="mb-4 rounded bg-red-100 p-3 text-red-700">
+						{errorMessage}
+					</div>
+				{/if}
 				<!-- Email Field -->
 				<div>
-					<label for="email" class="mb-2 block text-sm font-medium text-[#4F3117]">
-						EMAIL
-					</label>
+					<label for="email" class="mb-2 block text-sm font-medium text-[#4F3117]"> EMAIL </label>
 					<input
 						type="email"
 						id="email"
@@ -54,9 +89,11 @@
 				<!-- Sign In Button -->
 				<button
 					type="submit"
-					class="w-full rounded bg-[#4F3117] py-2.5 font-medium text-[#EEE9E1] transition hover:bg-[#3E2612]"
+					disabled={isLoading}
+					class="w-full rounded bg-[#4F3117] py-2.5 font-medium text-[#EEE9E1] transition
+  hover:bg-[#3E2612] disabled:opacity-50"
 				>
-					SIGN IN
+					{isLoading ? 'SIGNING IN...' : 'SIGN IN'}
 				</button>
 			</form>
 
