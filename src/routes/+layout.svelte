@@ -7,7 +7,7 @@
 </script>
 
 <Menu items={[
-	{ label: 'Home', href: '/' },
+	{ label: 'Home', href: '/home' },
 	{ label: 'Quest Log', href: '/quest-log' }
 ]} />
 

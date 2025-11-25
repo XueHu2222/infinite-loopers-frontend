@@ -1,5 +1,5 @@
 <script>
-	import knight from '$lib/assets/knight.png';
+	import knight from '$lib/assets/knight-landing-page.png';
 	import star from '$lib/assets/star.png';
 	import parchment from '$lib/assets/review-panel.png';
 	import ratingStar from '$lib/assets/review-star.png';
@@ -44,9 +44,10 @@
 			chores into fun challenges!
 		</p>
 
-		<button class="mt-6 cursor-pointer rounded-lg bg-[#4F3117] px-6 py-2 font-['IM_Fell_Great_Primer_SC'] text-lg text-white shadow-[0_4px_4px_rgba(0,0,0,0.25)] hover:bg-[#3E2612] sm:mt-10 sm:px-8 sm:py-3 sm:text-xl">
-			SIGN UP FREE
-		</button>
+		<a href="/signup" class="mt-6 cursor-pointer rounded-lg bg-[#4F3117] px-6 py-2 font-['IM_Fell_Great_Primer_SC'] text-lg text-white shadow-[0_4px_4px_rgba(0,0,0,0.25)] hover:bg-[#3E2612] sm:mt-10 sm:px-8 sm:py-3 sm:text-xl inline-block text-center">
+    		SIGN UP FREE
+		</a>
+
 	</div>
 
 	<div class="relative flex w-full justify-center lg:w-auto lg:justify-end">
