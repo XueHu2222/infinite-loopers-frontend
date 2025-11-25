@@ -1,13 +1,11 @@
-<script>
-	function addTask() {
-		alert('Add Task button clicked');
-	}
+<script lang="ts">
+    import type { PageData } from './$types'; // <--- 1. Import the type definition
+    
+    export let data: PageData; // <--- 2. Tell VS Code to use that type
 
-	let tasks = [
-		{ name: 'Read Book', end: '10/9/2025', status: 'Not Started', category: 'study' },
-		{ name: 'Design', end: '10/9/2025', status: 'Not Started', category: 'study' },
-		{ name: 'Clean Room', end: '12/9/2025', status: 'In Progress', category: 'housework' }
-	];
+    function addTask() {
+        alert('Add Task button clicked');
+    }
 </script>
 
 <div class="min-h-screen bg-[#F8F3ED] p-4 font-serif sm:p-6">
@@ -38,15 +36,30 @@
 			</thead>
 
 			<tbody>
-				{#each tasks as task}
-					<tr class="rounded-xl bg-[#F4E9D8] shadow-md">
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.name}</td>
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.end}</td>
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.status}</td>
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.category}</td>
-					</tr>
-				{/each}
-			</tbody>
+        {#each data.tasks as task}
+          <tr class="rounded-xl bg-[#F4E9D8] shadow-md">
+            <!-- 1. Name -->
+            <td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
+                {task.name}
+            </td>
+
+            <!-- 2. End Date (Changed 'task.end' to 'task.endDate') -->
+            <td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
+                {task.endDate ? new Date(task.endDate).toLocaleDateString() : 'No Date'}
+            </td>
+
+            <!-- 3. Status (Hardcoded because DB doesn't have it yet) -->
+            <td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
+                Not Started
+            </td>
+
+            <!-- 4. Category (Handle null values) -->
+            <td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
+                {task.category || '-'}
+            </td>
+          </tr>
+        {/each}
+      </tbody>
 		</table>
 	</div>
 </div>
