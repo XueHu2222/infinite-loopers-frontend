@@ -1,6 +1,6 @@
 <script>
 	import { page } from '$app/state';
-	import logo from '$lib/assets/logo.png';
+	import logo from '$lib/assets/Logo.png';
 	import { writable } from 'svelte/store';
 	import { onMount } from 'svelte';
 	let { items } = $props();
