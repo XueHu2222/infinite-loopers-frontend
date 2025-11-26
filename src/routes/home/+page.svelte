@@ -1,0 +1,1 @@
+<h1>Our home page with the room</h1>
