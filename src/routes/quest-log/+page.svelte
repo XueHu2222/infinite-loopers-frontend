@@ -1,13 +1,40 @@
 <script>
-	function addTask() {
-		alert('Add Task button clicked');
-	}
 
 	let tasks = [
 		{ name: 'Read Book', end: '10/9/2025', status: 'Not Started', category: 'study' },
 		{ name: 'Design', end: '10/9/2025', status: 'Not Started', category: 'study' },
 		{ name: 'Clean Room', end: '12/9/2025', status: 'In Progress', category: 'housework' }
 	];
+
+	let showModal = false;
+
+let form = {
+	name: "",
+	end: "",
+	category: ""
+};
+
+function addTask() {
+	showModal = true;
+}
+
+function submitTask() {
+	tasks = [...tasks, {
+		name: form.name,
+		end: form.end,
+		status: "Not Started",
+		category: form.category
+	}];
+
+	showModal = false;
+
+	form = {
+		name: "",
+		end: "",
+		category: ""
+	};
+}
+
 </script>
 
 <div class="min-h-screen bg-[#F8F3ED] p-4 font-serif sm:p-6">
@@ -24,6 +51,7 @@
 			+ Add Quest
 		</button>
 	</div>
+	
 
 	<!-- Quest Table -->
 	<div class="overflow-x-auto">
@@ -50,3 +78,48 @@
 		</table>
 	</div>
 </div>
+
+{#if showModal}
+	<div class="fixed inset-0 bg-black/40 flex justify-center items-center">
+		<div class="bg-white rounded-xl p-6 w-80 shadow-lg">
+
+			<h2 class="text-xl font-serif mb-4 text-[#4F3117]">Create New Task</h2>
+
+			<!-- Form Inputs (tailwindcss-forms auto styles) -->
+			<input
+				type="text"
+				placeholder="Task Name"
+				class="mb-3 w-full"
+				bind:value={form.name}
+			/>
+
+			<input
+				type="date"
+				class="mb-3 w-full"
+				bind:value={form.end}
+			/>
+
+			<select
+				class="mb-3 w-full"
+				bind:value={form.category}
+			>
+				<option value="">Select Category</option>
+				<option value="study">Study</option>
+				<option value="housework">Housework</option>
+				<option value="fitness">Fitness</option>
+			</select>
+
+			<!-- Buttons -->
+			<div class="flex gap-2 mt-4">
+				<button class="flex-1 bg-[#F5E8D9] py-2 rounded-lg text-[#4F3117]" on:click={submitTask}>
+					Submit
+				</button>
+
+				<button class="flex-1 bg-gray-300 py-2 rounded-lg text-[#4F3117]" on:click={() => (showModal = false)}>
+					Cancel
+				</button>
+			</div>
+
+		</div>
+	</div>
+{/if}
