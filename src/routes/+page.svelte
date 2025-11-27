@@ -5,6 +5,12 @@
 	import ratingStar from '$lib/assets/review-star.png';
 	import coin from '$lib/assets/coin.png';
 	import sword from '$lib/assets/sword.png';
+	import cats from '$lib/assets/cats.png';
+	import hourglass from '$lib/assets/hourglass.png';
+	import questLog from '$lib/assets/questLog.png';
+	import anvil from '$lib/assets/anvil.png';
+	import crystal from '$lib/assets/crystal.png';
+	import Footer from '$lib/components/Footer.svelte';
 
 	const reviews = [
 		{
@@ -29,6 +35,13 @@
 		"Focus With Ease",
 		"Feel In Control"
 	];
+
+	const tools = [
+      {imgSrc: hourglass, title: "Hourglass of Focus", subtitle: "(Focus Timer)"},
+      {imgSrc: questLog, title: "Adventurer's Quest Log", subtitle: "(To-dos)"},
+      {imgSrc: anvil, title: "The Time Smith's Blocks", subtitle: "(Time Blocking)"},
+      {imgSrc: crystal, title: "Ritual Stone", subtitle: "(Habits)"}
+    ];
 </script>
 
 <!-- Hero section -->
@@ -128,3 +141,43 @@
 			</div>
 		</div>
 </section>
+
+<!-- Team up section -->
+<section class="flex flex-col items-center bg-[#EEE9E1] px-6 py-12 sm:px-28 sm:py-20">
+    <h1 class="font-['IM_Fell_Great_Primer_SC'] text-[#4F3117] text-center text-3xl sm:text-4xl md:text-5xl tracking-tight">
+        Team up and succeed!
+    </h1>
+
+    <h2 class="font-['IM_Fell_Great_Primer_SC'] text-[#4F3117] lowercase text-center text-2xl sm:text-3xl md:text-4xl tracking-tight mb-8">
+        Work together, grow together
+    </h2>
+
+    <div class="flex flex-col items-center w-full lg:flex-row lg:space-x-12">
+        <img src={cats} alt="cats" class="w-full lg:w-[460px] h-auto drop-shadow-[0px_5px_5px_rgba(0,0,0,0.5)]"/>
+        <p class="bg-[#E8DCCD] p-4 lg:p-8 rounded-lg text-center lg:text-left font-['IM_Fell_Great_Primer_SC'] text-[#4F3117] text-xl sm:text-2xl md:text-3xl tracking-tight">
+            Squad up and finish quests with friends! Join group sessions, support each other, and celebrate every win.
+        </p>
+    </div>
+</section>
+
+<!-- Ancient tools section -->
+<section class="flex flex-col items-center bg-[#E8DCCD] pt-20 px-10 pb-30">
+  <h2 class="font-['IM_Fell_Great_Primer_SC'] text-3xl sm:text-4xl md:text-5xl text-[#5A3E1B] text-center tracking-tight">
+    Unlock the ancient tools of productivity!
+  </h2>
+  <h3 class="mt-2 font-['IM_Fell_Great_Primer_SC'] text-lg leading-tight font-medium tracking-tight text-[#5A3E1B] text-center sm:text-xl md:text-2xl">
+    Relics of old, each holding powers to strengthen your routine.
+  </h3>
+
+  <div class="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    {#each tools as tool}
+      <div class="flex flex-col items-center rounded-lg p-8 bg-[#EEE9E1] shadow-[0px_5px_5px_rgba(0,0,0,0.5)] hover:-translate-y-3 transition-transform duration-300 border-5 border-[#E6AE36]">
+        <img src={tool.imgSrc} alt={tool.title} class="w-auto h-30 mb-4"/>
+        <h2 class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-2xl text-center">{tool.title}</h2>
+        <h3 class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-xl text-center mt-2">{tool.subtitle}</h3>
+      </div>
+    {/each}
+  </div>
+</section>
+
+<Footer />
