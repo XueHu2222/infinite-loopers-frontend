@@ -1,9 +1,15 @@
 <script>
 	import { onMount } from 'svelte';
 
+	// Add this comment to tell VS Code that tasks is a list of anything
+	/** @type {any[]} */
 	let tasks = [];
+	
 	let showModal = false;
-	let currentUserId = null; 
+
+	// Add this comment to tell VS Code this can be a number or null
+	/** @type {number | null} */
+	let currentUserId = null;
 
 	let form = {
 		title: '',
@@ -21,7 +27,8 @@
 			const data = await res.json();
 
 			if (data.success) {
-				tasks = data.tasks.map((task) => ({
+				// We add the comment inside the ( ) to explicitly say "this is anything"
+          tasks = data.tasks.map((/** @type {any} */ task) => ({
 					title: task.title,
 					end: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '',
 					status: task.status,
@@ -168,20 +175,20 @@
 			<input type="text" placeholder="Task Name" class="mb-3 w-full border p-2 rounded" bind:value={form.title} />
 			<input type="date" class="mb-3 w-full border p-2 rounded" bind:value={form.endDate} />
 
-			<label class="block text-sm mb-1 text-gray-600">Priority</label>
-			<select class="mb-3 w-full border p-2 rounded" bind:value={form.priority}>
-				<option value="Low">Low</option>
-				<option value="Medium">Medium</option>
-				<option value="High">High</option>
-			</select>
+		  <label for="priority" class="block text-sm mb-1 text-gray-600">Priority</label>
+      <select id="priority" class="mb-3 w-full border p-2 rounded" bind:value={form.priority}>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
 
-			<label class="block text-sm mb-1 text-gray-600">Category</label>
-			<select class="mb-3 w-full border p-2 rounded" bind:value={form.category}>
-				<option value="">Select Category</option>
-				<option value="study">Study</option>
-				<option value="housework">Housework</option>
-				<option value="fitness">Fitness</option>
-			</select>
+      <label for="category" class="block text-sm mb-1 text-gray-600">Category</label>
+      <select id="category" class="mb-3 w-full border p-2 rounded" bind:value={form.category}>
+        <option value="">Select Category</option>
+        <option value="study">Study</option>
+        <option value="housework">Housework</option>
+        <option value="fitness">Fitness</option>
+      </select>
 
 			<div class="mt-4 flex gap-2">
 				<button class="flex-1 rounded-lg bg-[#F5E8D9] py-2 text-[#4F3117]" on:click={submitTask}>
