@@ -12,21 +12,31 @@
 		errorMessage = '';
 
 		try {
-			const response = await fetch('http://localhost:3012/auth/login', {
+			const response = await fetch('http://localhost:3011/auth/login', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({ email, password })
 			});
+			
+		// try {
+		// 	const response = await fetch('http://localhost:3012/auth/login', {
+		// 		method: 'POST',
+		// 		headers: {
+		// 			'Content-Type': 'application/json'
+		// 		},
+		// 		body: JSON.stringify({ email, password })
+		// 	});
 
 			const data = await response.json();
 
 			if (data.success) {
-				// Store user data in localStorage
+				localStorage.setItem('userId', data.user.id);
 				localStorage.setItem('user', JSON.stringify(data.user));
 
-				// Redirect to home or dashboard
+				localStorage.setItem('email', data.user.email);
+
 				window.location.href = '/home';
 			} else {
 				errorMessage = data.message || 'Login failed';
@@ -41,9 +51,13 @@
 </script>
 
 <div class="flex min-h-screen items-center justify-center bg-[#EEE9E1]">
-	<div class="relative w-full max-w-2xl rounded-lg border-4 border-[#4F3117] bg-[#E8DCCD] p-12 shadow-lg">
+	<div
+		class="relative w-full max-w-2xl rounded-lg border-4 border-[#4F3117] bg-[#E8DCCD] p-12 shadow-lg"
+	>
 		<!-- Sign In Title -->
-		<h1 class="mb-8 text-center text-4xl text-[#4F3117] font-['IM_Fell_Great_Primer_SC']">Sign In</h1>
+		<h1 class="mb-8 text-center font-['IM_Fell_Great_Primer_SC'] text-4xl text-[#4F3117]">
+			Sign In
+		</h1>
 
 		<div class="flex items-center gap-8">
 			<!-- Form Section -->
@@ -55,7 +69,12 @@
 				{/if}
 				<!-- Email Field -->
 				<div>
-					<label for="email" class="mb-2 block text-xl text-[#4F3117] font-['IM_Fell_Great_Primer_SC']"> Email </label>
+					<label
+						for="email"
+						class="mb-2 block font-['IM_Fell_Great_Primer_SC'] text-xl text-[#4F3117]"
+					>
+						Email
+					</label>
 					<input
 						type="email"
 						id="email"
@@ -68,7 +87,10 @@
 
 				<!-- Password Field -->
 				<div>
-					<label for="password" class="mb-2 block text-xl text-[#4F3117] font-['IM_Fell_Great_Primer_SC']">
+					<label
+						for="password"
+						class="mb-2 block font-['IM_Fell_Great_Primer_SC'] text-xl text-[#4F3117]"
+					>
 						Password
 					</label>
 					<input
@@ -79,7 +101,10 @@
 						class="w-full rounded border border-[#D4C5B0] bg-white px-3 py-2 text-[#4F3117] placeholder-[#A89078] focus:border-[#4F3117] focus:outline-none"
 						required
 					/>
-					<a href="/forgot-password" class="mt-1 block text-xs underline text-[#7A5C3E] font-['IM_Fell_Great_Primer_SC'] hover:text-[#382a1d]">
+					<a
+						href="/forgot-password"
+						class="mt-1 block font-['IM_Fell_Great_Primer_SC'] text-xs text-[#7A5C3E] underline hover:text-[#382a1d]"
+					>
 						FORGOT YOUR PASSWORD?
 					</a>
 				</div>
@@ -88,7 +113,7 @@
 				<button
 					type="submit"
 					disabled={isLoading}
-					class="w-full rounded bg-[#4F3117] font-['IM_Fell_Great_Primer_SC'] py-2.5 font-medium text-[#EEE9E1] transition
+					class="w-full rounded bg-[#4F3117] py-2.5 font-['IM_Fell_Great_Primer_SC'] font-medium text-[#EEE9E1] transition
   hover:bg-[#3E2612] disabled:opacity-50"
 				>
 					{isLoading ? 'SIGNING IN...' : 'SIGN IN'}
