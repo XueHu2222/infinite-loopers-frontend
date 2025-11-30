@@ -5,6 +5,17 @@
 	 * @type { any[]}
 	 */
 	let tasks = [];
+<<<<<<< HEAD
+=======
+	/** @type {any[]} */
+	let sortedTasks = [];
+	
+	let showModal = false;
+	let sortByPriority = 'none';
+	let sortByDate = 'none';
+	let filterByCategory = 'all';
+	let searchQuery = '';
+>>>>>>> origin/main
 
 	/** @type {any[]} */
 	let sortedTasks = [];
@@ -116,6 +127,61 @@
 		// If no sorting is applied, just return filtered tasks
 		if (sortByPriority === 'none' && sortByDate === 'none') {
 			sortedTasks = filteredTasks;
+			return;
+		}
+
+		/** @type {{ [key: string]: number }} */
+		const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
+		
+		sortedTasks = [...filteredTasks].sort((/** @type {any} */ a, /** @type {any} */ b) => {
+			// Priority sorting
+			if (sortByPriority !== 'none') {
+				const aPriorityValue = a.priority || 'Medium';
+				const bPriorityValue = b.priority || 'Medium';
+				const aPriority = priorityOrder[aPriorityValue] || 2;
+				const bPriority = priorityOrder[bPriorityValue] || 2;
+				
+				let priorityDiff = 0;
+				if (sortByPriority === 'high-to-low') {
+					priorityDiff = bPriority - aPriority;
+				} else {
+					priorityDiff = aPriority - bPriority;
+				}
+				
+				// If priorities are different, return the difference
+				if (priorityDiff !== 0) {
+					return priorityDiff;
+				}
+			}
+			
+			// Date sorting (as secondary sort or primary if priority is none)
+			if (sortByDate !== 'none') {
+				const aDate = a.end ? new Date(a.end).getTime() : 0;
+				const bDate = b.end ? new Date(b.end).getTime() : 0;
+				
+				// Handle empty dates - put them at the end
+				if (!a.end && !b.end) return 0;
+				if (!a.end) return 1;
+				if (!b.end) return -1;
+				
+				if (sortByDate === 'newest-first') {
+					return bDate - aDate;
+				} else {
+					return aDate - bDate;
+				}
+			}
+			
+			return 0;
+		});
+	}
+
+	$: if (tasks.length > 0 || sortByPriority || sortByDate || filterByCategory || searchQuery) {
+		sortTasks();
+	}
+
+	async function submitTask() {
+		if (!currentUserId) {
+			alert("You must be logged in to add a task.");
 			return;
 		}
 
