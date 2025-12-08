@@ -8,6 +8,7 @@
 	let calendarEl;
 	let tasks = [];
 	let userId = null;
+	let isSelectingDate = sessionStorage.getItem('isSelectingDate') === 'true';
 
 	onMount(() => {
 		const storedUser = localStorage.getItem('user');
@@ -27,7 +28,7 @@
 			const res = await fetch(`http://localhost:3011/tasks/${userId}`);
 			const data = await res.json();
 			if (data.success) {
-				tasks = data.tasks.map(task => ({
+				tasks = data.tasks.map((task) => ({
 					id: task.id,
 					title: task.title,
 					endDate: task.endDate,
@@ -44,7 +45,7 @@
 	}
 
 	function renderCalendar() {
-		const events = tasks.map(task => ({
+		const events = tasks.map((task) => ({
 			id: task.id,
 			title: task.title,
 			start: task.endDate,
@@ -60,9 +61,11 @@
 				right: 'dayGridMonth'
 			},
 			events,
-			dateClick: info => {
-				sessionStorage.setItem('selectedDate', info.dateStr);
-				goto('/quest-log');
+			dateClick: (info) => {
+				if (isSelectingDate) {
+					sessionStorage.setItem('selectedDate', info.dateStr);
+					goto('/quest-log');
+				}
 			},
 			height: 'auto'
 		});

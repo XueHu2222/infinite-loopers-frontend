@@ -43,19 +43,19 @@
 		userId = user.id;
 
 		const tempForm = sessionStorage.getItem('tempForm');
-		if (tempForm) {
-			const savedForm = JSON.parse(tempForm);
-			form = { ...form, ...savedForm };
-		}
-
 		const selectedDate = sessionStorage.getItem('selectedDate');
-		if (selectedDate) {
-			form.endDate = selectedDate;
-			showModal = true;
+		const isSelectingDate = sessionStorage.getItem('isSelectingDate') === 'true';
+
+		if (tempForm) {
+			form = JSON.parse(tempForm);
+			if (isSelectingDate) {
+				if (selectedDate) form.endDate = selectedDate;
+				showModal = true;
+			}
+			sessionStorage.removeItem('tempForm');
+			sessionStorage.removeItem('isSelectingDate');
 			sessionStorage.removeItem('selectedDate');
 		}
-
-		if (tempForm) sessionStorage.removeItem('tempForm');
 
 		await loadTasks();
 	});
@@ -92,6 +92,8 @@
 
 	function openCalendar() {
 		sessionStorage.setItem('tempForm', JSON.stringify(form));
+		sessionStorage.setItem('isSelectingDate', 'true');
+
 		goto('/calendar');
 	}
 
