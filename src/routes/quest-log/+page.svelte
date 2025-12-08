@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	/**
 	 * @type { any[]}
@@ -26,44 +27,37 @@
 	 * @type {null}
 	 */
 	let userId = null;
-	let email = "";
-	let error = "";
+	let email = '';
+	let error = '';
 
 	onMount(async () => {
-		const storedUser = localStorage.getItem("user");
+		const storedUser = localStorage.getItem('user');
 
 		if (!storedUser) {
-			error = "No user found, please login first.";
+			error = 'No user found, please login first.';
 			return;
 		}
 
 		const user = JSON.parse(storedUser);
 		email = user.email;
+		userId = user.id;
 
-		try {
-			const resUser = await fetch(
-				`http://localhost:3011/auth/userId?email=${email}`
-			// 	`http://localhost:3012/auth/userId?email=${email}`
-			);
-
-			if (!resUser.ok) {
-				error = "User service error";
-				return;
-			}
-
-			const dataUser = await resUser.json();
-			if (!dataUser.success) {
-				error = dataUser.message;
-				return;
-			}
-
-			userId = dataUser.user.id;
-
-			loadTasks();
-		} catch (err) {
-			console.error(err);
-			error = "Failed to load user";
+		const tempForm = sessionStorage.getItem('tempForm');
+		if (tempForm) {
+			const savedForm = JSON.parse(tempForm);
+			form = { ...form, ...savedForm };
 		}
+
+		const selectedDate = sessionStorage.getItem('selectedDate');
+		if (selectedDate) {
+			form.endDate = selectedDate;
+			showModal = true;
+			sessionStorage.removeItem('selectedDate');
+		}
+
+		if (tempForm) sessionStorage.removeItem('tempForm');
+
+		await loadTasks();
 	});
 
 	async function loadTasks() {
@@ -77,9 +71,7 @@
 			if (data.success) {
 				tasks = data.tasks.map((/** @type {any} */ task) => ({
 					title: task.title,
-					end: task.endDate
-						? new Date(task.endDate).toISOString().split("T")[0]
-						: "",
+					end: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '',
 					status: task.status,
 					category: task.category,
 					priority: task.priority
@@ -90,7 +82,7 @@
 			}
 		} catch (err) {
 			console.error(err);
-			error = "Failed to load tasks";
+			error = 'Failed to load tasks';
 		}
 	}
 
@@ -98,19 +90,26 @@
 		showModal = true;
 	}
 
+	function openCalendar() {
+		sessionStorage.setItem('tempForm', JSON.stringify(form));
+		goto('/calendar');
+	}
+
 	function sortTasks() {
 		// First, filter by search query
 		let filteredTasks = tasks;
 		if (searchQuery.trim() !== '') {
 			const query = searchQuery.toLowerCase().trim();
-			filteredTasks = filteredTasks.filter((/** @type {any} */ task) => 
+			filteredTasks = filteredTasks.filter((/** @type {any} */ task) =>
 				task.title.toLowerCase().includes(query)
 			);
 		}
 
 		// Then, filter by category
 		if (filterByCategory !== 'all') {
-			filteredTasks = filteredTasks.filter((/** @type {any} */ task) => task.category === filterByCategory);
+			filteredTasks = filteredTasks.filter(
+				(/** @type {any} */ task) => task.category === filterByCategory
+			);
 		}
 
 		// If no sorting is applied, just return filtered tasks
@@ -120,8 +119,8 @@
 		}
 
 		/** @type {{ [key: string]: number }} */
-		const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
-		
+		const priorityOrder = { High: 3, Medium: 2, Low: 1 };
+
 		sortedTasks = [...filteredTasks].sort((/** @type {any} */ a, /** @type {any} */ b) => {
 			// Priority sorting
 			if (sortByPriority !== 'none') {
@@ -129,37 +128,37 @@
 				const bPriorityValue = b.priority || 'Medium';
 				const aPriority = priorityOrder[aPriorityValue] || 2;
 				const bPriority = priorityOrder[bPriorityValue] || 2;
-				
+
 				let priorityDiff = 0;
 				if (sortByPriority === 'high-to-low') {
 					priorityDiff = bPriority - aPriority;
 				} else {
 					priorityDiff = aPriority - bPriority;
 				}
-				
+
 				// If priorities are different, return the difference
 				if (priorityDiff !== 0) {
 					return priorityDiff;
 				}
 			}
-			
+
 			// Date sorting (as secondary sort or primary if priority is none)
 			if (sortByDate !== 'none') {
 				const aDate = a.end ? new Date(a.end).getTime() : 0;
 				const bDate = b.end ? new Date(b.end).getTime() : 0;
-				
+
 				// Handle empty dates - put them at the end
 				if (!a.end && !b.end) return 0;
 				if (!a.end) return 1;
 				if (!b.end) return -1;
-				
+
 				if (sortByDate === 'newest-first') {
 					return bDate - aDate;
 				} else {
 					return aDate - bDate;
 				}
 			}
-			
+
 			return 0;
 		});
 	}
@@ -175,17 +174,17 @@
 
 		try {
 			const res = await fetch(`http://localhost:3011/tasks/${userId}`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(newTask)
 			});
 
-		// try {
-		// 	const res = await fetch(`http://localhost:3010/tasks/${userId}`, {
-		// 		method: "POST",
-		// 		headers: { "Content-Type": "application/json" },
-		// 		body: JSON.stringify(newTask)
-		// 	});
+			// try {
+			// 	const res = await fetch(`http://localhost:3010/tasks/${userId}`, {
+			// 		method: "POST",
+			// 		headers: { "Content-Type": "application/json" },
+			// 		body: JSON.stringify(newTask)
+			// 	});
 
 			const data = await res.json();
 
@@ -194,11 +193,7 @@
 					...tasks,
 					{
 						title: data.task.title,
-						end: data.task.endDate
-							? new Date(data.task.endDate)
-									.toISOString()
-									.split("T")[0]
-							: "",
+						end: data.task.endDate ? new Date(data.task.endDate).toISOString().split('T')[0] : '',
 						status: data.task.status,
 						category: data.task.category,
 						priority: data.task.priority
@@ -209,21 +204,19 @@
 				showModal = false;
 
 				form = {
-					title: "",
-					endDate: "",
-					category: "",
-					priority: "Medium"
+					title: '',
+					endDate: '',
+					category: '',
+					priority: 'Medium'
 				};
 			} else {
-				alert(data.message || "Failed to add task");
+				alert(data.message || 'Failed to add task');
 			}
 		} catch (err) {
 			console.error(err);
 		}
 	}
 </script>
-
-
 
 <div class="min-h-screen bg-[#F8F3ED] p-4 font-serif sm:p-6">
 	<h1 class="mb-4 text-center text-3xl tracking-wide text-[#4F3117] sm:mb-6 sm:text-4xl">
@@ -236,7 +229,7 @@
 			type="text"
 			placeholder="Search tasks by name..."
 			bind:value={searchQuery}
-			class="w-full rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4F3117] sm:px-4 sm:py-2 sm:text-lg"
+			class="w-full rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
 		/>
 	</div>
 
@@ -248,14 +241,16 @@
 		>
 			+ Add Quest
 		</button>
-		
+
 		<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
 			<div class="flex items-center gap-2">
-				<label for="filter-category" class="text-base text-[#4F3117] sm:text-lg">Filter by Category:</label>
-				<select 
-					id="filter-category" 
+				<label for="filter-category" class="text-base text-[#4F3117] sm:text-lg"
+					>Filter by Category:</label
+				>
+				<select
+					id="filter-category"
 					bind:value={filterByCategory}
-					class="rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4F3117] sm:px-4 sm:py-2 sm:text-lg"
+					class="rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
 				>
 					<option value="all">All</option>
 					<option value="study">Study</option>
@@ -263,26 +258,28 @@
 					<option value="fitness">Fitness</option>
 				</select>
 			</div>
-			
+
 			<div class="flex items-center gap-2">
-				<label for="sort-priority" class="text-base text-[#4F3117] sm:text-lg">Sort by Priority:</label>
-				<select 
-					id="sort-priority" 
+				<label for="sort-priority" class="text-base text-[#4F3117] sm:text-lg"
+					>Sort by Priority:</label
+				>
+				<select
+					id="sort-priority"
 					bind:value={sortByPriority}
-					class="rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4F3117] sm:px-4 sm:py-2 sm:text-lg"
+					class="rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
 				>
 					<option value="none">None</option>
 					<option value="high-to-low">High to Low</option>
 					<option value="low-to-high">Low to High</option>
 				</select>
 			</div>
-			
+
 			<div class="flex items-center gap-2">
 				<label for="sort-date" class="text-base text-[#4F3117] sm:text-lg">Sort by Date:</label>
-				<select 
-					id="sort-date" 
+				<select
+					id="sort-date"
 					bind:value={sortByDate}
-					class="rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4F3117] sm:px-4 sm:py-2 sm:text-lg"
+					class="rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
 				>
 					<option value="none">None</option>
 					<option value="newest-first">Newest First</option>
@@ -308,7 +305,9 @@
 			<tbody>
 				{#if sortedTasks.length === 0}
 					<tr>
-						<td colspan="5" class="text-center py-4 text-gray-500">No quests found. Add one above!</td>
+						<td colspan="5" class="py-4 text-center text-gray-500"
+							>No quests found. Add one above!</td
+						>
 					</tr>
 				{:else}
 					{#each sortedTasks as task}
@@ -316,10 +315,13 @@
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.title}</td>
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.end}</td>
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
-								<span class={
-									task.priority === 'High' ? 'text-red-600 font-bold' : 
-									task.priority === 'Medium' ? 'text-orange-600' : 'text-green-600'
-								}>
+								<span
+									class={task.priority === 'High'
+										? 'font-bold text-red-600'
+										: task.priority === 'Medium'
+											? 'text-orange-600'
+											: 'text-green-600'}
+								>
 									{task.priority || 'Medium'}
 								</span>
 							</td>
@@ -339,18 +341,30 @@
 		<div class="w-80 rounded-xl bg-white p-6 shadow-lg">
 			<h2 class="mb-4 font-serif text-xl text-[#4F3117]">Create New Task</h2>
 
-			<input type="text" placeholder="Task Name" class="mb-3 w-full border p-2 rounded" bind:value={form.title} />
-			<input type="date" class="mb-3 w-full border p-2 rounded" bind:value={form.endDate} />
+			<input
+				type="text"
+				placeholder="Task Name"
+				class="mb-3 w-full rounded border p-2"
+				bind:value={form.title}
+			/>
+			<button
+				type="button"
+				on:click={openCalendar}
+				class="mb-3 flex w-full items-center justify-between rounded border p-2 text-left text-gray-700"
+			>
+				<span>{form.endDate || 'Pick a date'}</span>
+				<span>📅</span>
+			</button>
 
-			<label for="priority" class="block text-sm mb-1 text-gray-600">Priority</label>
-			<select id="priority" class="mb-3 w-full border p-2 rounded" bind:value={form.priority}>
+			<label for="priority" class="mb-1 block text-sm text-gray-600">Priority</label>
+			<select id="priority" class="mb-3 w-full rounded border p-2" bind:value={form.priority}>
 				<option value="Low">Low</option>
 				<option value="Medium">Medium</option>
 				<option value="High">High</option>
 			</select>
 
-			<label for="category" class="block text-sm mb-1 text-gray-600">Category</label>
-			<select id="category" class="mb-3 w-full border p-2 rounded" bind:value={form.category}>
+			<label for="category" class="mb-1 block text-sm text-gray-600">Category</label>
+			<select id="category" class="mb-3 w-full rounded border p-2" bind:value={form.category}>
 				<option value="">Select Category</option>
 				<option value="study">Study</option>
 				<option value="housework">Housework</option>

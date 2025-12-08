@@ -2,70 +2,78 @@
 	import { onMount } from 'svelte';
 	import { Calendar } from '@fullcalendar/core';
 	import dayGridPlugin from '@fullcalendar/daygrid';
-	import timeGridPlugin from '@fullcalendar/timegrid';
 	import interactionPlugin from '@fullcalendar/interaction';
+	import { goto } from '$app/navigation';
 
 	let calendarEl;
-
-	// fake data
-	const tasks = [
-		{ id: 1, title: 'Slay Goblin King', endDate: '2025-12-07' },
-		{ id: 2, title: 'Collect Magic Herbs', endDate: '2025-12-08' },
-		{ id: 3, title: 'Train Sword Skills', endDate: '2025-12-09' }
-	];
+	let tasks = [];
+	let userId = null;
 
 	onMount(() => {
-		const events = tasks.map((task) => {
-			const deadline = new Date(task.endDate);
+		const storedUser = localStorage.getItem('user');
+		if (!storedUser) {
+			console.error('No user found, please login first.');
+			return;
+		}
+		const user = JSON.parse(storedUser);
+		userId = user.id;
 
-			// defalut 8:00-17:00
-			const start = new Date(deadline);
-			start.setHours(8, 0, 0);
+		loadTasks();
+	});
 
-			const end = new Date(deadline);
-			end.setHours(17, 0, 0);
+	async function loadTasks() {
+		if (!userId) return;
+		try {
+			const res = await fetch(`http://localhost:3011/tasks/${userId}`);
+			const data = await res.json();
+			if (data.success) {
+				tasks = data.tasks.map(task => ({
+					id: task.id,
+					title: task.title,
+					endDate: task.endDate,
+					category: task.category,
+					priority: task.priority
+				}));
+				renderCalendar();
+			} else {
+				console.error(data.message);
+			}
+		} catch (err) {
+			console.error(err);
+		}
+	}
 
-			return {
-				id: task.id,
-				title: task.title,
-				start,
-				end,
-				extendedProps: { coin: true }
-			};
-		});
+	function renderCalendar() {
+		const events = tasks.map(task => ({
+			id: task.id,
+			title: task.title,
+			start: task.endDate,
+			allDay: true
+		}));
 
 		const calendar = new Calendar(calendarEl, {
-			plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+			plugins: [dayGridPlugin, interactionPlugin],
 			initialView: 'dayGridMonth',
 			headerToolbar: {
 				left: 'prev,next today',
 				center: 'title',
-				right: 'dayGridMonth,timeGridWeek,timeGridDay'
+				right: 'dayGridMonth'
 			},
 			events,
-			eventClick: (info) => {
-				alert(`Task: ${info.event.title}`);
-			},
-			dateClick: (info) => {
-				alert(`Clicked date: ${info.dateStr}`);
-			},
-			eventContent: (arg) => {
-				return {
-					html: `
-            <span>${arg.event.title}</span>
-        `
-				};
+			dateClick: info => {
+				sessionStorage.setItem('selectedDate', info.dateStr);
+				goto('/quest-log');
 			},
 			height: 'auto'
 		});
 
 		calendar.render();
-	});
+	}
 </script>
 
 <section class="bg-[#FAF6F0] px-6 py-12 sm:px-12 lg:px-28">
 	<h2 class="mb-8 text-center font-['IM_Fell_Great_Primer_SC'] text-4xl text-[#4F3117]">
-		Quest Calendar
+		Calendar
 	</h2>
 
 	<div bind:this={calendarEl} class="rounded-lg bg-[#EEE9E1] p-4 shadow-lg"></div>
