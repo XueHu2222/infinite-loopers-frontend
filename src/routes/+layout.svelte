@@ -8,7 +8,8 @@
 
 <Menu items={[
 	{ label: 'Home', href: '/home' },
-	{ label: 'Quest Log', href: '/quest-log' }
+	{ label: 'Quest Log', href: '/quest-log' },
+	{ label: 'Achievements', href: '/achievements' },
 ]} />
 
 <svelte:head>
