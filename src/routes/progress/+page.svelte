@@ -1,5 +1,5 @@
 <script>
-  // 1. Mock Data
+  // Mock Data
   let stats = {
     totalCompleted: 34,
     completionRate: 76,
@@ -33,22 +33,27 @@
         streak: 7
     }
   };
-  
-  // 2. Images 
+
+  // Images 
   import coinIcon from '$lib/assets/coinbag.png'; 
   import starIcon from '$lib/assets/superstar.png'; 
   import owlImage from '$lib/assets/owl.png'; 
   import frogImage from '$lib/assets/frog.png'; 
   import parchment from '$lib/assets/review-panel.png';
   import coinSmall from '$lib/assets/coin.png';
+  import Footer from '$lib/components/Footer.svelte';
+  import { fly } from 'svelte/transition';
 
-  // 3. PIE CHART MATH LOGIC
+  // PIE CHART MATH LOGIC
+  
   /**
+   * This comment fixes the red lines! 
+   * It tells VS Code exactly what "data" looks like.
    * @param {Array<{name: string, value: number, color: string}>} data
    */
   function getPieSlices(data) {
     const total = data.reduce((sum, item) => sum + item.value, 0);
-    let cumulativeAngle = -90; 
+    let cumulativeAngle = -90; // Start at top
     
     return data.map(item => {
       const sliceAngle = (item.value / total) * 360;
@@ -74,7 +79,7 @@
   let pieSlices = getPieSlices(stats.categories);
 </script>
 
-<!-- SECTION 1: TOP STATS -->
+<!-- TOP STATS -->
 <section class="bg-[#E8DCCD] px-4 py-12 sm:px-12 lg:px-28">
   
   <h1 class="mb-12 text-center font-['IM_Fell_Great_Primer_SC'] text-3xl sm:text-5xl text-[#4F3117]">
@@ -112,10 +117,10 @@
   </div>
 </section>
 
-<!-- SECTION 2: OWL & COINS -->
+<!-- OWL & COINS -->
 <section class="bg-[#FAF6F0] px-4 py-16 sm:px-12 lg:px-28">
 
-  <!-- ROW 2: Currency & Level -->
+  <!-- Currency & Level -->
   <div class="grid grid-cols-1 gap-6 md:grid-cols-2 max-w-6xl mx-auto mb-20">
     <div class="flex items-center gap-4 sm:gap-6 rounded-lg border-4 border-[#5C4B35] bg-[#E0D8C8] p-4 sm:p-6 shadow-lg transform hover:scale-[1.02] transition-transform">
       <img src={coinIcon} alt="Coins" class="h-16 w-16 sm:h-20 sm:w-20 object-contain drop-shadow-md" />
@@ -138,15 +143,15 @@
     </div>
   </div>
 
-  <!-- ROW 3: Weekly Quest Completion-->
+  <!-- Weekly Quest Completion-->
   <div class="mb-8 max-w-6xl mx-auto">
     <h2 class="text-center font-['IM_Fell_Great_Primer_SC'] text-2xl sm:text-4xl text-[#4F3117]">Weekly Quest Completion</h2>
     <p class="mb-8 text-center font-['Inter'] text-xs sm:text-base font-bold text-[#6D5C45] uppercase">Quests completed vs pending this week</p>
     
     <div class="flex flex-col items-center lg:flex-row lg:items-end lg:justify-center relative mt-8">
-      <div class="relative z-10 w-48 sm:w-64 lg:w-80 lg:-mr-16 -mb-16 lg:-mb-8 order-1 lg:order-1 pointer-events-none flex justify-center">
-
-          <div class="absolute top-4 left-4 w-3/4 h-3/4 bg-[#3E3B4B] rounded-full blur-[2px] opacity-90 scale-110"></div>
+      
+      <!-- OWL -->
+      <div class="relative z-10 w-48 sm:w-64 lg:w-80 lg:-mr-4 -mb-16 lg:-mb-8 order-1 lg:order-1 pointer-events-none flex justify-center">
           <img src={owlImage} alt="Owl Wizard" class="relative z-10 w-full drop-shadow-2xl" />
       </div>
       
@@ -182,7 +187,7 @@
   </div>
 </section>
 
-<!-- SECTION 3: FROG -->
+<!-- FROG -->
 <section class="bg-[#E8DCCD] px-4 py-16 sm:px-12 lg:px-28">
   
   <div class="max-w-6xl mx-auto">
@@ -190,9 +195,8 @@
     <p class="mb-8 text-center font-['Inter'] text-xs sm:text-base font-bold text-[#6D5C45] uppercase">Distribution of completed quests</p>
 
     <div class="flex flex-col items-center lg:flex-row lg:items-end lg:justify-center relative mt-8">
-      <div class="relative z-10 w-48 sm:w-64 lg:w-80 lg:-ml-16 -mb-16 lg:-mb-8 order-1 lg:order-2 pointer-events-none flex justify-center">
-        
-          <div class="absolute top-8 right-4 w-3/4 h-3/4 bg-[#8C7B65] rounded-full blur-[2px] opacity-90 scale-110"></div>
+      
+      <div class="relative z-10 w-48 sm:w-64 lg:w-80 lg:-ml-4 -mb-16 lg:-mb-8 order-1 lg:order-2 pointer-events-none flex justify-center">
           <img src={frogImage} alt="Frog Traveler" class="relative z-10 w-full drop-shadow-2xl" />
       </div>
 
@@ -228,7 +232,7 @@
   </div>
 </section>
 
-<!-- SECTION 4: INSIGHTS -->
+<!-- INSIGHTS -->
 <section class="bg-[#FAF6F0] px-4 py-16 sm:px-12 lg:px-28">
   
   <div class="max-w-4xl mx-auto">
