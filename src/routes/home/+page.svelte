@@ -26,7 +26,7 @@
 </section>
 
 <section class="relative bg-[#E8DCCD] pt-16 sm:pt-20 lg:pt-24 pb-20 flex flex-col items-center px-4">
-  <a href="/home" class="relative mb-5 sm:absolute sm:top-4 sm:left-4 md:top-6 md:left-6 lg:top-5 lg:left-8 py-3 px-6 font-['IM_Fell_Great_Primer_SC'] text-xl cursor-pointer rounded-lg bg-[#4F3117] text-[#EEE9E1] hover:bg-[#3E2612]">
+  <a href="/wardrobe" class="relative mb-5 sm:absolute sm:top-4 sm:left-4 md:top-6 md:left-6 lg:top-5 lg:left-8 py-3 px-6 font-['IM_Fell_Great_Primer_SC'] text-xl cursor-pointer rounded-lg bg-[#4F3117] text-[#EEE9E1] hover:bg-[#3E2612]">
     Open Wardrobe
   </a>
 

@@ -35,7 +35,7 @@
     Your wallet: <span class="font-bold">{coins}</span> Coins
 </h1>
 
-<section class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 p-8 bg-[#F8F3ED] font-['IM_Fell_Great_Primer_SC']">
+<section class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 p-8 bg-[#F8F3ED] font-['IM_Fell_Great_Primer_SC'] min-h-screen items-start auto-rows-max">
     {#each data.characters as character}
         <article class="bg-[#fbf5ec] border-4 border-[#4f311747] rounded-md flex flex-col p-6 text-center">
             <div class="flex justify-center mb-6">
