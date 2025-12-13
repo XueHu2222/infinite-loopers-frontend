@@ -1,6 +1,5 @@
 <script>
-    let { showModal = $bindable(), header, children } = $props();
-
+    let { showModal = $bindable() } = $props();
     let dialog = $state();
 
     $effect(() => {
@@ -11,41 +10,96 @@
 <dialog
     bind:this={dialog}
     onclose={() => (showModal = false)}
-    onclick={(e) => { if (e.target === dialog) dialog.close(); }}
+    onclick={(e) => {
+        if (e.target === dialog) dialog.close();
+    }}
+    class="
+        fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+        w-[520px] max-w-[90vw]
+        bg-[#fdf3e7]
+        border-[6px] border-double border-[#ad8a6c]
+        rounded-xl
+        shadow-[0_0_20px_rgba(0,0,0,0.5)]
+        font-['IM_Fell_Great_Primer_SC']
+        p-0
+    "
 >
-    <div class="bg-white p-6 rounded-lg shadow-2xl max-w-lg w-full">
-        {@render header?.()}
-        
-        <hr class="my-4 border-gray-300" />
-        
-        <div class="space-y-4">
-            {@render children?.()}
-        </div>
-        
-        <hr class="my-4 border-gray-300" />
-        
-        <button 
-            autofocus 
+    <div
+        class="
+            flex items-center justify-between
+            text-[#4F3117]
+            px-6 py-4
+            border-b-2 border-[#ad8a6c]
+        "
+    >
+        <h2 class="text-2xl">
+            Choose a quest to focus on
+        </h2>
+
+        <button
             onclick={() => dialog.close()}
-            class="w-full mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 transition duration-150 ease-in-out"
+            aria-label="Close"
+            class="
+                bg-transparent border-none
+                text-xl text-[#4F3117]
+                cursor-pointer
+                transition-transform duration-200
+                hover:rotate-12
+            "
         >
-            Close Modal
+            ✖
         </button>
     </div>
-</dialog>
 
-<style>
-    dialog {
-        position: fixed; 
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        
-        border: none;
-        padding: 0;
-    }
-    
-    dialog::backdrop {
-        background: rgba(0, 0, 0, 0.4);
-    }
-</style>
+    <div class="p-6">
+        <ul class="list-none p-0 m-0 space-y-3">
+            <li
+                class="
+                    bg-[#fff8e1]
+                    border-2 border-[#ad8a6c]
+                    px-4 py-3
+                    text-lg
+                    rounded-lg
+                    cursor-pointer
+                    transition-all duration-200 ease-in-out
+                    hover:bg-[#f1e0c5]
+                    hover:scale-[1.03]
+                "
+            >
+                🗡️ Stretch
+            </li>
+
+            <li
+                class="
+                    bg-[#fff8e1]
+                    border-2 border-[#ad8a6c]
+                    px-4 py-3
+                    text-lg
+                    rounded-lg
+                    cursor-pointer
+                    transition-all duration-200 ease-in-out
+                    hover:bg-[#f1e0c5]
+                    hover:scale-[1.03]
+                "
+            >
+                📜 Do math homework
+            </li>
+
+            <li
+                class="
+                    bg-[#fff8e1]
+                    border-2 border-[#ad8a6c]
+                    px-4 py-3
+                    text-lg
+                    rounded-lg
+                    cursor-pointer
+                    transition-all duration-200 ease-in-out
+                    hover:bg-[#f1e0c5]
+                    hover:scale-[1.03]
+                "
+            >
+                🏹 Clean room
+            </li>
+        </ul>
+    </div>
+</dialog>
