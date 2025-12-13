@@ -4,7 +4,7 @@ export const load = async ({ cookies, fetch }) => {
     try {
         const userId = cookies.get('userId');
         if (!userId) throw new Error("User ID not found in cookies");
-        const charactersResponse = await fetch(`${PUBLIC_API_URL}/characters`);
+        const charactersResponse = await fetch(`${PUBLIC_API_URL}/shop/characters`);
         const userResponse = await fetch(`${PUBLIC_API_URL}/users/${userId}`);
 
         if (!charactersResponse.ok) {
@@ -17,7 +17,9 @@ export const load = async ({ cookies, fetch }) => {
 
         const characterJson = await charactersResponse.json();
         const userJson = await userResponse.json();
-        const allCharacters = characterJson.data;
+
+        // All characters except the first one - it is the default character
+        const allCharacters = characterJson.data.slice(1);
         const userInformation = userJson.data;
         return { characters: allCharacters, user: userInformation };
     } catch (error) {

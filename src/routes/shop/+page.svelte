@@ -3,26 +3,30 @@
     let coins = $state(data.user.coins);
     const userId = data.user.id;
     let ownedCharacterIds = $state(data.user.ownedCharacters.map((/** @type {{ characterId: number; }} */ c) => c.characterId));
-
+    
     /**
      * Purchase a character from the shop
 	 * @param {number} characterId
 	 */
     async function buyCharacter(characterId) {
-    const res = await fetch(`http://localhost:3011/users/${userId}/characters`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characterId })
-    });
+    try {
+        const res = await fetch(`http://localhost:3011/users/${userId}/characters`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ characterId })
+        });
 
-    const result = await res.json();
+        const result = await res.json();
 
-    if (res.ok) {
-       coins = result.newCoins;
-       ownedCharacterIds = [...ownedCharacterIds, characterId];
-       alert(result.message);
-    } else {
-       alert(result.message);
+        if (res.ok && result.message) {
+            coins = result.newCoins;
+            ownedCharacterIds = [...ownedCharacterIds, characterId];
+            alert(result.message);
+        } else {
+            alert(result.message || 'Failed to purchase character');
+        }
+    } catch (error) {
+        alert('Error occurred while purchasing the character.');
     }
   }
 </script>
@@ -47,10 +51,9 @@
 
             <button class="bg-[#4F3117] text-lg cursor-pointer text-[#EEE9E1] hover:bg-[#3E2612] px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-default" 
             onclick={() => buyCharacter(character.id)}
-            disabled={coins < character.price || ownedCharacterIds.includes(character.id)}>
+            disabled={ownedCharacterIds.includes(character.id)}>
                  {ownedCharacterIds.includes(character.id) ? 'Owned' : 'Buy'}
             </button>
-
         </article>
     {/each}
 </section> 

@@ -10,7 +10,8 @@ export const load = async ({ cookies, fetch }) => {
             throw new Error(`Failed to fetch the current character: ${characterResponse.statusText}`);
         }
 
-        const characterJson = await characterResponse.json();
+        const userCharacterJson = await characterResponse.json();
+        const characterJson = userCharacterJson.data;
         const currentCharacter = characterJson.data;
         return { character: currentCharacter };
     } catch (error) {

@@ -38,7 +38,7 @@
     </div>
 
     <div class="flex flex-col items-center rounded-lg p-6 sm:p-8 bg-[#E3D3BF] border-4 border-[#4f311747] w-full max-w-[300px]">
-      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-xl sm:text-2xl">Quest completed:</p>
+      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-xl sm:text-2xl">Quests completed:</p>
       <img src={scrollIcon} alt='scroll' class="w-auto h-20 sm:h-30 my-4"/>
       <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-3xl">10</p>
     </div>
