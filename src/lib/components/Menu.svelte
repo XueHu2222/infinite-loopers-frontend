@@ -22,11 +22,21 @@
 	});
 
 	// Logout function
-	function handleLogout() {
-		localStorage.removeItem('user');
-		user = null;
-		window.location.href = '/signin';
-	}
+	async function handleLogout() {
+		try {
+        await fetch('http://localhost:3011/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        localStorage.removeItem('user');
+		localStorage.removeItem('userId');
+		localStorage.removeItem('email');
+        user = null;
+        window.location.href = '/signin';
+    } catch (err) {
+        console.error('Logout failed', err);
+    }
+}
 </script>
 
 <header class="bg-[#EEE9E1] px-4 py-3 sm:px-8 sm:py-5">
