@@ -2,6 +2,10 @@
     import room from '$lib/assets/home-page/room.png';
     import sky from '$lib/assets/home-page/sky.png';
     import focusButton from '$lib/assets/home-page/focus-button.png';
+
+    import ChooseQuest from '$lib/components/ChooseQuest.svelte';
+    let showModal = $state(false);
+
     import hourglassIcon from '$lib/assets/hourglass.png';
     import scrollIcon from '$lib/assets/home-page/scroll.png';
     import streakIcon from '$lib/assets/home-page/streak.png';
@@ -25,12 +29,13 @@
         {/each}
     </div>
 
-    <a href="/home" class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-58 h-30 sm:w-78 sm:h-40 flex items-center justify-center font-['IM_Fell_Great_Primer_SC'] text-2xl sm:text-3xl md:text-4xl tracking-[-0.5%] text-[#5a3e1b] cursor-pointer hover:text-[#B69476] transition-colors duration-100 z-10"
+    <button onclick={() => (showModal = true)} class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-58 h-30 sm:w-78 sm:h-40 flex items-center justify-center font-['IM_Fell_Great_Primer_SC'] text-2xl sm:text-3xl md:text-4xl tracking-[-0.5%] text-[#5a3e1b] cursor-pointer hover:text-[#B69476] transition-colors duration-100 z-10"
         style="background-image: url({focusButton}); background-size: contain; background-position: center; background-repeat: no-repeat;">
         Focus Now
-    </a>
+    </button>
 </section>
 
+<ChooseQuest tasks={data.tasks} bind:showModal />
 <section class="relative bg-[#E8DCCD] pt-16 sm:pt-20 lg:pt-24 pb-20 flex flex-col items-center px-4">
   <a href="/wardrobe" class="relative mb-5 sm:absolute sm:top-4 sm:left-4 md:top-6 md:left-6 lg:top-5 lg:left-8 py-3 px-6 font-['IM_Fell_Great_Primer_SC'] text-xl cursor-pointer rounded-lg bg-[#4F3117] text-[#EEE9E1] hover:bg-[#3E2612]">
     Open Wardrobe
