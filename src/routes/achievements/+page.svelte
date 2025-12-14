@@ -14,33 +14,60 @@
     $: currentPath = $page.url.pathname;
 
     let user = null;
+    
+    // CHANGED: Real data from API instead of mock
+    let achievements = [];
+    let stats = {
+        achievementsUnlocked: 0,
+        totalAchievements: 0,
+        completionRate: 0,
+        totalXP: 0
+    };
 
-    onMount(() => {
+    onMount(async () => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             user = JSON.parse(storedUser);
         }
+
+        // NEW: Fetch real data
+        if (user && user.id) {
+            await fetchAchievements(user.id);
+            await fetchStats(user.id);
+        }
     });
+
+    // NEW: Fetch achievements
+    async function fetchAchievements(userId) {
+        try {
+            const response = await fetch(`http://localhost:3020/achievements/user/${userId}`);
+            const data = await response.json();
+            if (data.success) {
+                achievements = data.achievements;
+            }
+        } catch (error) {
+            console.error('Error fetching achievements:', error);
+        }
+    }
+
+    // NEW: Fetch stats
+    async function fetchStats(userId) {
+        try {
+            const response = await fetch(`http://localhost:3020/achievements/user/${userId}/stats`);
+            const data = await response.json();
+            if (data.success) {
+                stats = data.stats;
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+        }
+    }
 
     function handleLogout() {
         localStorage.removeItem('user');
         user = null;
         window.location.href = '/signin';
     }
-
-    // Mock achievement data
-    const achievements = [
-        { title: "First Step", desc: "Complete your first quest", points: 5, unlocked: true, progress: "1/1" },
-        { title: "Quest Master", desc: "Complete 50 quests", points: 25, unlocked: true, progress: "50/50" },
-        { title: "Social Butterfly", desc: "Join a party", points: 50, unlocked: true, progress: "1/1" },
-        { title: "Music Lover", desc: "Listen to all playlists", points: 100, unlocked: false, progress: "3/6" },
-        { title: "Speed Runner", desc: "Complete a quest under 5 minutes", points: 80, unlocked: false, progress: "0/1" },
-        { title: "Decorator", desc: "Buy 10 furniture items", points: 100, unlocked: false, progress: "1/10" },
-        { title: "Legend", desc: "Reach level 50", points: 200, unlocked: false, progress: "23/50" },
-        { title: "Night Owl", desc: "Complete 10 quests after 8 PM", points: 150, unlocked: false, progress: "3/10" },
-        { title: "Week Warrior", desc: "Maintain a 7-day streak", points: 20, unlocked: false, progress: "5/7" },
-        { title: "Perfectionist", desc: "Complete 100 quests", points: 300, unlocked: false, progress: "0/100" }
-    ];
 </script>
 
 <div class="min-h-screen" style="background-color: #B5A490;">
@@ -63,7 +90,7 @@
                         Achievements<br />Unlocked
                     </div>
                     <div class="font-serif text-6xl font-bold text-[#3E2612]">
-                        3/10
+                        {stats.achievementsUnlocked}/{stats.totalAchievements}
                     </div>
                 </div>
                 <div>
@@ -71,7 +98,7 @@
                         Completion<br />Rate
                     </div>
                     <div class="font-serif text-6xl font-bold text-[#3E2612]">
-                        30%
+                        {stats.completionRate}%
                     </div>
                 </div>
                 <div>
@@ -79,7 +106,7 @@
                         Total<br />XP
                     </div>
                     <div class="font-serif text-6xl font-bold text-[#3E2612]">
-                        50
+                        {stats.totalXP}
                     </div>
                 </div>
             </div>
@@ -126,15 +153,11 @@
                                     </span>
                                 {/if}
 
-                                <h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.title}</h2>
-                                <p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.desc}</p>
-
-                                {#if ach.progress}
-                                    <p class="mb-4 text-sm text-[#5C4633]">{ach.progress}</p>
-                                {/if}
+                                <h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.name}</h2>
+                                <p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.description}</p>
 
                                 <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                                    <span class="text-base font-semibold text-[#3E2612]">· {ach.points} points</span>
+                                    <span class="text-base font-semibold text-[#3E2612]">{ach.icon} {ach.points} points</span>
                                     <img src={medal} alt="Medal" class="h-34 w314" />
                                 </div>
                             </div>
@@ -154,15 +177,11 @@
                                     </span>
                                 {/if}
 
-                                <h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.title}</h2>
-                                <p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.desc}</p>
-
-                                {#if ach.progress}
-                                    <p class="mb-4 text-sm text-[#5C4633]">{ach.progress}</p>
-                                {/if}
+                                <h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.name}</h2>
+                                <p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.description}</p>
 
                                 <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                                    <span class="text-base font-semibold text-[#3E2612]">· {ach.points} points</span>
+                                    <span class="text-base font-semibold text-[#3E2612]">{ach.icon} {ach.points} points</span>
                                     <img src={medal} alt="Medal" class="h-34 w-34" />
                                 </div>
                             </div>
@@ -182,15 +201,11 @@
                                     </span>
                                 {/if}
 
-                                <h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.title}</h2>
-                                <p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.desc}</p>
-
-                                {#if ach.progress}
-                                    <p class="mb-4 text-sm text-[#5C4633]">{ach.progress}</p>
-                                {/if}
+                                <h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.name}</h2>
+                                <p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.description}</p>
 
                                 <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                                    <span class="text-base font-semibold text-[#3E2612]">· {ach.points} points</span>
+                                    <span class="text-base font-semibold text-[#3E2612]">{ach.icon} {ach.points} points</span>
                                     <img src={medal} alt="Medal" class="h-34 w-34" />
                                 </div>
                             </div>
@@ -210,43 +225,11 @@
                                     </span>
                                 {/if}
 
-                                <h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.title}</h2>
-                                <p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.desc}</p>
-
-                                {#if ach.progress}
-                                    <p class="mb-4 text-sm text-[#5C4633]">{ach.progress}</p>
-                                {/if}
+                                <h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.name}</h2>
+                                <p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.description}</p>
 
                                 <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                                    <span class="text-base font-semibold text-[#3E2612]">· {ach.points} points</span>
-                                    <img src={medal} alt="Medal" class="h-34 w-34" />
-                                </div>
-                            </div>
-                        {/each}
-                    </div>
-
-                    <!-- Row 5 - aligned LEFT -->
-                    <div class="flex justify-start gap-5">
-                        {#each achievements.slice(8, 10) as ach}
-                            <div class="relative aspect-square w-[380px] rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:translate-y-[-2px]" 
-                                 style="border: 5px solid #6e5c3d;">
-                                
-                                {#if ach.unlocked}
-                                    <span class="absolute right-4 top-4 rounded-md bg-[#EEE9E1] px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#3E2612]" 
-                                          style="border: 2px solid #8B7355;">
-                                        Unlocked
-                                    </span>
-                                {/if}
-
-                                <h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.title}</h2>
-                                <p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.desc}</p>
-
-                                {#if ach.progress}
-                                    <p class="mb-4 text-sm text-[#5C4633]">{ach.progress}</p>
-                                {/if}
-
-                                <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                                    <span class="text-base font-semibold text-[#3E2612]">· {ach.points} points</span>
+                                    <span class="text-base font-semibold text-[#3E2612]">{ach.icon} {ach.points} points</span>
                                     <img src={medal} alt="Medal" class="h-34 w-34" />
                                 </div>
                             </div>
