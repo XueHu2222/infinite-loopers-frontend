@@ -9,8 +9,7 @@
 <Menu items={[
 	{ label: 'Home', href: '/home' },
 	{ label: 'Quest Log', href: '/quest-log' },
-	{ label: 'Progress', href: '/progress' } 
-	{ label: 'Achievements', href: '/achievements' },
+	{ label: 'Calendar', href: '/calendar'}
 ]} />
 
 <svelte:head>

@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	/**
 	 * @type { any[]}
@@ -39,31 +40,24 @@
 
 		const user = JSON.parse(storedUser);
 		email = user.email;
+		userId = user.id;
 
-		try {
-			const resUser = await fetch(
-				`http://localhost:3012/auth/userId?email=${email}`
-				// 	`http://localhost:3012/auth/userId?email=${email}`
-			);
+		const tempForm = sessionStorage.getItem('tempForm');
+		const selectedDate = sessionStorage.getItem('selectedDate');
+		const isSelectingDate = sessionStorage.getItem('isSelectingDate') === 'true';
 
-			if (!resUser.ok) {
-				error = 'User service error';
-				return;
+		if (tempForm) {
+			form = JSON.parse(tempForm);
+			if (isSelectingDate) {
+				if (selectedDate) form.endDate = selectedDate;
+				showModal = true;
 			}
-
-			const dataUser = await resUser.json();
-			if (!dataUser.success) {
-				error = dataUser.message;
-				return;
-			}
-
-			userId = dataUser.user.id;
-
-			loadTasks();
-		} catch (err) {
-			console.error(err);
-			error = 'Failed to load user';
+			sessionStorage.removeItem('tempForm');
+			sessionStorage.removeItem('isSelectingDate');
+			sessionStorage.removeItem('selectedDate');
 		}
+
+		await loadTasks();
 	});
 
 	async function loadTasks() {
@@ -95,6 +89,13 @@
 
 	function addTask() {
 		showModal = true;
+	}
+
+	function openCalendar() {
+		sessionStorage.setItem('tempForm', JSON.stringify(form));
+		sessionStorage.setItem('isSelectingDate', 'true');
+
+		goto('/calendar');
 	}
 
 	function sortTasks() {
@@ -175,7 +176,7 @@
 		const newTask = { ...form, userId };
 
 		try {
-			const res = await fetch(`http://localhost:3010/tasks/${userId}`, {
+			const res = await fetch(`http://localhost:3011/tasks/${userId}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(newTask)
@@ -392,7 +393,14 @@
 				class="mb-3 w-full rounded border p-2"
 				bind:value={form.title}
 			/>
-			<input type="date" class="mb-3 w-full rounded border p-2" bind:value={form.endDate} />
+			<button
+				type="button"
+				on:click={openCalendar}
+				class="mb-3 flex w-full items-center justify-between rounded border p-2 text-left text-gray-700"
+			>
+				<span>{form.endDate || 'Pick a date'}</span>
+				<span>📅</span>
+			</button>
 
 			<label for="priority" class="mb-1 block text-sm text-gray-600">Priority</label>
 			<select id="priority" class="mb-3 w-full rounded border p-2" bind:value={form.priority}>
