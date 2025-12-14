@@ -64,12 +64,13 @@
 		if (!userId) return;
 
 		try {
-			const res = await fetch(`http://localhost:3011/tasks/${userId}`);
+			const res = await fetch(`http://localhost:3010/tasks/${userId}`);
 			// const res = await fetch(`http://localhost:3010/tasks/${userId}`);
 			const data = await res.json();
 
 			if (data.success) {
 				tasks = data.tasks.map((/** @type {any} */ task) => ({
+					id: task.id,
 					title: task.title,
 					end: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '',
 					status: task.status,
@@ -194,6 +195,7 @@
 				tasks = [
 					...tasks,
 					{
+						id:data.task.id,
 						title: data.task.title,
 						end: data.task.endDate ? new Date(data.task.endDate).toISOString().split('T')[0] : '',
 						status: data.task.status,
@@ -216,6 +218,34 @@
 			}
 		} catch (err) {
 			console.error(err);
+		}
+	}
+	// @ts-ignore
+	async function completeTask(taskId) {
+		try {
+			const res = await fetch(`http://localhost:3010/tasks/${taskId}/complete`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' }
+			});
+
+			const data = await res.json();
+
+			if (data.success) {
+				// Show unlocked achievements if any
+				if (data.unlockedAchievements && data.unlockedAchievements.length > 0) {
+					// @ts-ignore
+					const achievementNames = data.unlockedAchievements.map((a) => a.name).join(', ');
+					alert(`🎉 Achievement unlocked: ${achievementNames}!`);
+				}
+
+				// Reload tasks
+				await loadTasks();
+			} else {
+				alert(data.message || 'Failed to complete task');
+			}
+		} catch (err) {
+			console.error(err);
+			alert('Failed to complete task');
 		}
 	}
 </script>
@@ -301,13 +331,14 @@
 					<th class="px-2 py-2 text-left sm:px-4">Priority</th>
 					<th class="px-2 py-2 text-left sm:px-4">Status</th>
 					<th class="px-2 py-2 text-left sm:px-4">Category</th>
+					<th class="px-2 py-2 text-left sm:px-4">Actions</th>
 				</tr>
 			</thead>
 
 			<tbody>
 				{#if sortedTasks.length === 0}
 					<tr>
-						<td colspan="5" class="py-4 text-center text-gray-500"
+						<td colspan="6" class="py-4 text-center text-gray-500"
 							>No quests found. Add one above!</td
 						>
 					</tr>
@@ -329,6 +360,19 @@
 							</td>
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.status}</td>
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.category}</td>
+							<!-- ADD THIS ENTIRE <td> BLOCK -->
+							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
+								{#if task.status !== 'Completed'}
+									<button
+										on:click={() => completeTask(task.id)}
+										class="rounded bg-green-600 px-3 py-1 text-white hover:bg-green-700"
+									>
+										✓ Complete
+									</button>
+								{:else}
+									<span class="text-green-600">✓ Done</span>
+								{/if}
+							</td>
 						</tr>
 					{/each}
 				{/if}
@@ -368,9 +412,11 @@
 			<label for="category" class="mb-1 block text-sm text-gray-600">Category</label>
 			<select id="category" class="mb-3 w-full rounded border p-2" bind:value={form.category}>
 				<option value="">Select Category</option>
-				<option value="study">Study</option>
-				<option value="housework">Housework</option>
-				<option value="fitness">Fitness</option>
+				<option value="Study">Study</option>
+				<option value="Work">Work</option>
+				<option value="Chores">Chores</option>
+				<option value="Health">Health</option>
+				<option value="Reading">Reading</option>
 			</select>
 
 			<div class="mt-4 flex gap-2">

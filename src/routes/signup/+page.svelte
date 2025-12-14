@@ -16,7 +16,7 @@
 		errorMessage = '';
 
 		try {
-			const response = await fetch('http://localhost:3011/auth/register', {
+			const response = await fetch('http://localhost:3012/auth/register', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
