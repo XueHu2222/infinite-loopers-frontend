@@ -70,7 +70,7 @@
 		if (!userId) return;
 
 		try {
-			const res = await fetch(`http://localhost:3011/tasks/${userId}`);
+			const res = await fetch(`http://localhost:3010/tasks/${userId}`);
 			// const res = await fetch(`http://localhost:3010/tasks/${userId}`);
 			const data = await res.json();
 
@@ -174,7 +174,7 @@
 		const newTask = { ...form, userId };
 
 		try {
-			const res = await fetch(`http://localhost:3011/tasks/${userId}`, {
+			const res = await fetch(`http://localhost:3010/tasks/${userId}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(newTask)
@@ -352,9 +352,11 @@
 			<label for="category" class="block text-sm mb-1 text-gray-600">Category</label>
 			<select id="category" class="mb-3 w-full border p-2 rounded" bind:value={form.category}>
 				<option value="">Select Category</option>
-				<option value="study">Study</option>
-				<option value="housework">Housework</option>
-				<option value="fitness">Fitness</option>
+				<option value="Study">Study</option>
+				<option value="Work">Work</option>
+				<option value="Chores">Chores</option>
+				<option value="Health">Health</option>
+				<option value="Reading">Reading</option>
 			</select>
 
 			<div class="mt-4 flex gap-2">
