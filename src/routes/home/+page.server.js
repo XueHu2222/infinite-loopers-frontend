@@ -16,6 +16,7 @@ export const load = async ({ cookies, fetch }) => {
 
         if (!tasksResponse.ok) {
             throw new Error(`Failed to fetch tasks: ${tasksResponse.statusText}`);
+        }
         if (!shopResponse.ok) {
             throw new Error(`Failed to fetch all decorations: ${shopResponse.statusText}`);
         }
