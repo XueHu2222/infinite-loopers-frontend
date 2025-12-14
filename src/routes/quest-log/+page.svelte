@@ -64,8 +64,8 @@
 		if (!userId) return;
 
 		try {
-			//const res = await fetch(`http://localhost:3011/tasks/${userId}`);
 			const res = await fetch(`http://localhost:3010/tasks/${userId}`);
+			// const res = await fetch(`http://localhost:3010/tasks/${userId}`);
 			const data = await res.json();
 
 			if (data.success) {
@@ -412,9 +412,11 @@
 			<label for="category" class="mb-1 block text-sm text-gray-600">Category</label>
 			<select id="category" class="mb-3 w-full rounded border p-2" bind:value={form.category}>
 				<option value="">Select Category</option>
-				<option value="study">Study</option>
-				<option value="housework">Housework</option>
-				<option value="fitness">Fitness</option>
+				<option value="Study">Study</option>
+				<option value="Work">Work</option>
+				<option value="Chores">Chores</option>
+				<option value="Health">Health</option>
+				<option value="Reading">Reading</option>
 			</select>
 
 			<div class="mt-4 flex gap-2">
