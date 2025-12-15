@@ -10,9 +10,12 @@
 	/** @type {any[]} */
 	let sortedTasks = [];
 
+	/** @type {any[]} */
+	let originalTasksOrder = [];
+
 	let showModal = false;
-	let sortByPriority = 'none';
-	let sortByDate = 'none';
+	let sortByPriority = 'none'; // 'none' | 'asc' | 'desc'
+	let sortByDate = 'none'; // 'none' | 'asc' | 'desc'
 	let filterByCategory = 'all';
 	let searchQuery = '';
 
@@ -69,14 +72,18 @@
 			const data = await res.json();
 
 			if (data.success) {
-				tasks = data.tasks.map((/** @type {any} */ task) => ({
+				tasks = data.tasks.map((/** @type {any} */ task, index) => ({
 					id: task.id,
 					title: task.title,
 					end: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '',
 					status: task.status,
 					category: task.category,
-					priority: task.priority
+					priority: task.priority,
+					originalIndex: index, // Store original order
+					createdAt: task.createdAt || task.created_at || new Date().getTime() // Use createdAt if available, otherwise use current time
 				}));
+				// Store original order
+				originalTasksOrder = [...tasks];
 				sortTasks();
 			} else {
 				error = data.message;
@@ -115,9 +122,18 @@
 			);
 		}
 
-		// If no sorting is applied, just return filtered tasks
+		// If no sorting is applied, restore original order (by time added)
 		if (sortByPriority === 'none' && sortByDate === 'none') {
-			sortedTasks = filteredTasks;
+			// Sort by original index or createdAt to restore original order
+			sortedTasks = [...filteredTasks].sort((/** @type {any} */ a, /** @type {any} */ b) => {
+				if (a.originalIndex !== undefined && b.originalIndex !== undefined) {
+					return a.originalIndex - b.originalIndex;
+				}
+				// Fallback to createdAt if available
+				const aTime = a.createdAt || 0;
+				const bTime = b.createdAt || 0;
+				return aTime - bTime;
+			});
 			return;
 		}
 
@@ -133,9 +149,9 @@
 				const bPriority = priorityOrder[bPriorityValue] || 2;
 
 				let priorityDiff = 0;
-				if (sortByPriority === 'high-to-low') {
+				if (sortByPriority === 'desc') {
 					priorityDiff = bPriority - aPriority;
-				} else {
+				} else if (sortByPriority === 'asc') {
 					priorityDiff = aPriority - bPriority;
 				}
 
@@ -155,15 +171,37 @@
 				if (!a.end) return 1;
 				if (!b.end) return -1;
 
-				if (sortByDate === 'newest-first') {
+				if (sortByDate === 'desc') {
 					return bDate - aDate;
-				} else {
+				} else if (sortByDate === 'asc') {
 					return aDate - bDate;
 				}
 			}
 
 			return 0;
 		});
+	}
+
+	function toggleSortPriority() {
+		if (sortByPriority === 'none') {
+			sortByPriority = 'asc';
+		} else if (sortByPriority === 'asc') {
+			sortByPriority = 'desc';
+		} else {
+			sortByPriority = 'none';
+		}
+		// Reactive statement will automatically call sortTasks()
+	}
+
+	function toggleSortDate() {
+		if (sortByDate === 'none') {
+			sortByDate = 'asc';
+		} else if (sortByDate === 'asc') {
+			sortByDate = 'desc';
+		} else {
+			sortByDate = 'none';
+		}
+		// Reactive statement will automatically call sortTasks()
 	}
 
 	$: if (tasks.length > 0 || sortByPriority || sortByDate || filterByCategory || searchQuery) {
@@ -192,17 +230,18 @@
 			const data = await res.json();
 
 			if (data.success) {
-				tasks = [
-					...tasks,
-					{
-						id:data.task.id,
-						title: data.task.title,
-						end: data.task.endDate ? new Date(data.task.endDate).toISOString().split('T')[0] : '',
-						status: data.task.status,
-						category: data.task.category,
-						priority: data.task.priority
-					}
-				];
+				const newTask = {
+					id: data.task.id,
+					title: data.task.title,
+					end: data.task.endDate ? new Date(data.task.endDate).toISOString().split('T')[0] : '',
+					status: data.task.status,
+					category: data.task.category,
+					priority: data.task.priority,
+					originalIndex: tasks.length, // New task gets last index
+					createdAt: data.task.createdAt || data.task.created_at || new Date().getTime()
+				};
+				tasks = [...tasks, newTask];
+				originalTasksOrder = [...tasks];
 				sortTasks();
 
 				showModal = false;
@@ -274,50 +313,77 @@
 			+ Add Quest
 		</button>
 
-		<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-			<div class="flex items-center gap-2">
-				<label for="filter-category" class="text-base text-[#4F3117] sm:text-lg"
-					>Filter by Category:</label
+		<!-- Interactive Filter Buttons -->
+		<div class="flex flex-wrap items-center gap-3">
+			<!-- Category Filter -->
+			<div class="flex flex-wrap gap-2">
+				<button
+					on:click={() => (filterByCategory = 'all')}
+					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory === 'all'
+						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
+						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
 				>
-				<select
-					id="filter-category"
-					bind:value={filterByCategory}
-					class="rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
+					All Categories
+				</button>
+				<button
+					on:click={() => (filterByCategory = 'study')}
+					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory === 'study'
+						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
+						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
 				>
-					<option value="all">All</option>
-					<option value="study">Study</option>
-					<option value="housework">Housework</option>
-					<option value="fitness">Fitness</option>
-				</select>
+					Study
+				</button>
+				<button
+					on:click={() => (filterByCategory = 'housework')}
+					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory === 'housework'
+						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
+						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
+				>
+					Housework
+				</button>
+				<button
+					on:click={() => (filterByCategory = 'fitness')}
+					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory === 'fitness'
+						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
+						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
+				>
+					Fitness
+				</button>
 			</div>
 
-			<div class="flex items-center gap-2">
-				<label for="sort-priority" class="text-base text-[#4F3117] sm:text-lg"
-					>Sort by Priority:</label
-				>
-				<select
-					id="sort-priority"
-					bind:value={sortByPriority}
-					class="rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
-				>
-					<option value="none">None</option>
-					<option value="high-to-low">High to Low</option>
-					<option value="low-to-high">Low to High</option>
-				</select>
-			</div>
+			<!-- Sort by Priority Button -->
+			<button
+				on:click={toggleSortPriority}
+				class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white px-4 py-2 text-sm font-medium text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {sortByPriority !== 'none'
+					? 'bg-[#F5E8D9] shadow-md'
+					: ''}"
+			>
+				<span>Priority</span>
+				{#if sortByPriority === 'asc'}
+					<span class="text-lg">↑</span>
+				{:else if sortByPriority === 'desc'}
+					<span class="text-lg">↓</span>
+				{:else}
+					<span class="text-gray-400">⇅</span>
+				{/if}
+			</button>
 
-			<div class="flex items-center gap-2">
-				<label for="sort-date" class="text-base text-[#4F3117] sm:text-lg">Sort by Date:</label>
-				<select
-					id="sort-date"
-					bind:value={sortByDate}
-					class="rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
-				>
-					<option value="none">None</option>
-					<option value="newest-first">Newest First</option>
-					<option value="oldest-first">Oldest First</option>
-				</select>
-			</div>
+			<!-- Sort by Date Button -->
+			<button
+				on:click={toggleSortDate}
+				class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white px-4 py-2 text-sm font-medium text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {sortByDate !== 'none'
+					? 'bg-[#F5E8D9] shadow-md'
+					: ''}"
+			>
+				<span>Date</span>
+				{#if sortByDate === 'asc'}
+					<span class="text-lg">↑</span>
+				{:else if sortByDate === 'desc'}
+					<span class="text-lg">↓</span>
+				{:else}
+					<span class="text-gray-400">⇅</span>
+				{/if}
+			</button>
 		</div>
 	</div>
 
