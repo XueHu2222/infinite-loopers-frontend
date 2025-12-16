@@ -111,7 +111,6 @@
 	}
 
 	function sortTasks() {
-		// First, filter by search query
 		let filteredTasks = tasks;
 		if (searchQuery.trim() !== '') {
 			const query = searchQuery.toLowerCase().trim();
@@ -120,14 +119,12 @@
 			);
 		}
 
-		// Then, filter by category
 		if (filterByCategory !== 'all') {
 			filteredTasks = filteredTasks.filter(
 				(/** @type {any} */ task) => task.category === filterByCategory
 			);
 		}
 
-		// If no sorting is applied, restore original order (by time added)
 		if (sortByPriority === 'none' && sortByDate === 'none') {
 			// Sort by original index or createdAt to restore original order
 			sortedTasks = [...filteredTasks].sort((/** @type {any} */ a, /** @type {any} */ b) => {
