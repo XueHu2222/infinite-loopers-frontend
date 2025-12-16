@@ -119,10 +119,9 @@
 		// Then, filter by category
 		if (filterByCategory !== 'all') {
 			filteredTasks = filteredTasks.filter(
-				(/** @type {any} */ task) => task.category === filterByCategory
+				(/** @type {any} */ task) => task.category.toLowerCase() === filterByCategory.toLowerCase()
 			);
 		}
-
 		// If no sorting is applied, restore original order (by time added)
 		if (sortByPriority === 'none' && sortByDate === 'none') {
 			// Sort by original index or createdAt to restore original order
@@ -319,7 +318,8 @@
 			<div class="flex flex-wrap gap-2">
 				<button
 					on:click={() => (filterByCategory = 'all')}
-					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory === 'all'
+					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory ===
+					'all'
 						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
 						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
 				>
@@ -327,7 +327,8 @@
 				</button>
 				<button
 					on:click={() => (filterByCategory = 'study')}
-					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory === 'study'
+					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory ===
+					'study'
 						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
 						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
 				>
@@ -335,7 +336,8 @@
 				</button>
 				<button
 					on:click={() => (filterByCategory = 'housework')}
-					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory === 'housework'
+					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory ===
+					'housework'
 						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
 						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
 				>
@@ -343,7 +345,8 @@
 				</button>
 				<button
 					on:click={() => (filterByCategory = 'fitness')}
-					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory === 'fitness'
+					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory ===
+					'fitness'
 						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
 						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
 				>
@@ -354,7 +357,8 @@
 			<!-- Sort by Priority Button -->
 			<button
 				on:click={toggleSortPriority}
-				class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white px-4 py-2 text-sm font-medium text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {sortByPriority !== 'none'
+				class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white px-4 py-2 text-sm font-medium text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {sortByPriority !==
+				'none'
 					? 'bg-[#F5E8D9] shadow-md'
 					: ''}"
 			>
@@ -371,7 +375,8 @@
 			<!-- Sort by Date Button -->
 			<button
 				on:click={toggleSortDate}
-				class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white px-4 py-2 text-sm font-medium text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {sortByDate !== 'none'
+				class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white px-4 py-2 text-sm font-medium text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {sortByDate !==
+				'none'
 					? 'bg-[#F5E8D9] shadow-md'
 					: ''}"
 			>
@@ -436,7 +441,7 @@
 										✓ Complete
 									</button>
 								{:else}
-									<span class="text-green-600">✓ Done</span>
+									<span class="text-green-600">✓ Completed</span>
 								{/if}
 							</td>
 						</tr>
