@@ -43,8 +43,8 @@ export const load = async ({ cookies, fetch }) => {
         const ownedDecorationsData = ownedDecorationsJson.data;
         const ownedCharactersData = ownedCharactersJson.data;
 
-        const ownedDecorationsArray = ownedDecorationsData.map((/** @type {{ data: any; }} */ res) => res.data);
-        const ownedCharactersArray = ownedCharactersData.map((/** @type {{ data: any; }} */ res) => res.data);
+        const ownedDecorationsArray = ownedDecorationsData.map((res) => res.data);
+        const ownedCharactersArray = ownedCharactersData.map((res) => res.data);
         return { characters: allCharacters, user: userInformation, 
             decorations: allDecorations, ownedDecorations: ownedDecorationsArray,
             ownedCharacters: ownedCharactersArray

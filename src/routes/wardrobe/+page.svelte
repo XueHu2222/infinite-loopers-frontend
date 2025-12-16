@@ -1,4 +1,5 @@
 <script>
+    import { openModal } from '../../modalStore.js';
     let { data } = $props();
     const userId = data.user.id;
     let currentCharacter = $state(data.user.currentCharacterId);
@@ -22,12 +23,12 @@ async function equipCharacter(characterId) {
 
         if (res.ok && result.message) {
             currentCharacter = characterId;
-            alert(result.message);
+            openModal(result.message, 'success');
         } else {
-            alert(result.message || 'Failed to equip character');
+            openModal(result.message, 'error');
         }
     } catch (error) {
-        alert('Error occurred while equipping the character.');
+        openModal('Error occurred while equipping the character.', 'error');
     }
 }
 </script>

@@ -1,4 +1,5 @@
 <script>
+	import { openModal } from '../../modalStore.js';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
@@ -253,7 +254,7 @@
 					priority: 'Medium'
 				};
 			} else {
-				alert(data.message || 'Failed to add task');
+				openModal(data.message || 'Failed to add task', 'error');
 			}
 		} catch (err) {
 			console.error(err);
@@ -272,19 +273,18 @@
 			if (data.success) {
 				// Show unlocked achievements if any
 				if (data.unlockedAchievements && data.unlockedAchievements.length > 0) {
-					// @ts-ignore
 					const achievementNames = data.unlockedAchievements.map((a) => a.name).join(', ');
-					alert(`🎉 Achievement unlocked: ${achievementNames}!`);
+					openModal(`🎉 Achievement unlocked: ${achievementNames}!`, 'success');
 				}
 
 				// Reload tasks
 				await loadTasks();
 			} else {
-				alert(data.message || 'Failed to complete task');
+				openModal(data.message || 'Failed to complete task', 'error');
 			}
 		} catch (err) {
 			console.error(err);
-			alert('Failed to complete task');
+			openModal('Failed to complete task', 'error');
 		}
 	}
 </script>

@@ -20,7 +20,7 @@ export const load = async ({ cookies, fetch }) => {
 
         const allUserCharactersJson = charactersJson.data;
         const userInformation = userJson.data;
-        const allUserCharactersArray = allUserCharactersJson.map((/** @type {{ data: any; }} */ ch) => (ch.data))
+        const allUserCharactersArray = allUserCharactersJson.map(ch => (ch.data))
         return { characters: allUserCharactersArray, user: userInformation };
     } catch (error) {
         console.error('Error loading characters:', error);

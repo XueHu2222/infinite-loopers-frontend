@@ -27,7 +27,7 @@ export const load = async ({ cookies, fetch }) => {
         const allUserDecorationsJson = decorationsJson.data;
         const userInformation = userJson.data;
         const allPlacedDecorations = placedDecorationsJson.data;
-        const allUserDecorationsArray = allUserDecorationsJson.map((/** @type {{ data: any; }} */ deco) => (deco.data));
+        const allUserDecorationsArray = allUserDecorationsJson.map(deco => (deco.data));
         return { decorations: allUserDecorationsArray, user: userInformation, placedDecorations: allPlacedDecorations.placedDecorationIds };
     } catch (error) {
         console.error('Error loading decorations:', error);
