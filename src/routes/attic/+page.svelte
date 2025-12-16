@@ -1,12 +1,9 @@
 <script>
+	import { openModal } from '../../modalStore.js';
 	let { data } = $props();
 	const userId = data.user.id;
 	let placedDecorations = $state(data.placedDecorations);
-
-	/**
-	 * Set a decoration as placed or remove it
-	 * @param {number} decorationId
-	 */
+	
 	async function toggleDecoration(decorationId) {
         const isPlaced = placedDecorations.includes(decorationId);
 
@@ -21,16 +18,16 @@
 
 			if (res.ok && result.message) {
 				if (isPlaced) {
-					placedDecorations = placedDecorations.filter((/** @type {number} */ id) => id !== decorationId);
+					placedDecorations = placedDecorations.filter((id) => id !== decorationId);
 				} else {
 					placedDecorations = [...placedDecorations, decorationId];
 				}
-				alert(result.message);
+				openModal(result.message, 'success');
 			} else {
-				alert(result.message || 'Failed to place decoration');
+				openModal(result.message, 'error');
 			}
 		} catch (error) {
-			alert('Error occurred while placing decoration.');
+			openModal('Error occurred while placing decoration.', 'error');
 		}
 	}
 </script>

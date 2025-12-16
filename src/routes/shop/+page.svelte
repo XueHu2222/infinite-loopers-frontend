@@ -1,9 +1,10 @@
 <script>
+    import { openModal } from '../../modalStore.js';
     let { data } = $props();
     let coins = $state(data.user.coins);
     const userId = data.user.id;
-    let ownedCharacterIds = $state(data.ownedCharacters.map((/** @type {{ id: any; }} */ ch) => ch.id));
-    let ownedDecorationIds = $state(data.ownedDecorations.map((/** @type {{ id: any; }} */ deco) => deco.id));
+    let ownedCharacterIds = $state(data.ownedCharacters.map(ch => ch.id));
+    let ownedDecorationIds = $state(data.ownedDecorations.map(deco => deco.id));
     let activeSection = $state('characters');
 
     /**
@@ -23,12 +24,12 @@
             if (res.ok && result.message) {
                 coins = result.newCoins;
                 ownedCharacterIds = [...ownedCharacterIds, characterId];
-                alert(result.message);
+                openModal(result.message, 'success');
             } else {
-                alert(result.message || 'Failed to purchase character');
+                openModal(result.message, 'error');
             }
         } catch (error) {
-            alert('Error occurred while purchasing the character.');
+            openModal('Error occurred while purchasing the character.', 'error');
         }
     }
 
@@ -49,12 +50,12 @@
             if (res.ok && result.message) {
                 coins = result.newCoins;
                 ownedDecorationIds = [...ownedDecorationIds, decorationId];
-                alert(result.message);
+                openModal(result.message, 'success');
             } else {
-                alert(result.message || 'Failed to purchase decoration');
+                openModal(result.message, 'error');
             }
         } catch (error) {
-            alert('Error occurred while purchasing the decoration.');
+            openModal('Error occurred while purchasing the decoration.', 'error');
         }
     }
 </script>
