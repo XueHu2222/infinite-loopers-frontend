@@ -581,11 +581,14 @@
 			<label for="category" class="mb-1 block text-sm text-gray-600">Category</label>
 			<select id="category" class="mb-3 w-full rounded border p-2" bind:value={form.category}>
 				<option value="">Select Category</option>
-				<option value="Study">Study</option>
 				<option value="Work">Work</option>
+				<option value="Study">Study</option>
 				<option value="Chores">Chores</option>
-				<option value="Health">Health</option>
+				<option value="Wellness">Wellness</option>
 				<option value="Reading">Reading</option>
+				<option value="Hobbies">Hobbies</option>
+				<option value="Social">Social</option>
+				<option value="Events">Events</option>
 			</select>
 
 			<div class="mt-4 flex gap-2">

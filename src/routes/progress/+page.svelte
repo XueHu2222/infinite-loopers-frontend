@@ -80,26 +80,52 @@
     'Sun': 'Sunday'
   };
 
-  // 4. FETCH DATA 
+ // 4. FETCH DATA 
   onMount(async () => {
     try {
-        // Retrieve the specific ID saved during login
         const userId = localStorage.getItem('userId');
         
-        // Security Check: If they aren't logged in, send them to Sign In
         if (!userId) {
             goto('/signin'); 
             return;
         }
 
-        console.log("Fetching progress for User ID:", userId);
+        // 1. Fetch Charts from TASKS Service 
+        const taskResponse = await fetch(`http://localhost:3010/tasks/progress/${userId}`);
+        const taskData = await taskResponse.json();
 
-        // Fetch data for THIS specific user
-        const response = await fetch(`http://localhost:3010/tasks/progress/${userId}`);
-        const data = await response.json();
+        // 2. Fetch Coins from USERS Service
+        let userData = null;
+        try {
+            const userResponse = await fetch(`http://localhost:3012/users/${userId}`);
+            userData = await userResponse.json();
 
-        if (data.success) {
-            stats = data.stats;
+        } catch (e) {
+            console.error("Could not fetch user details (coins)", e);
+        }
+
+        if (taskData.success) {
+            // Load the chart data
+            stats = taskData.stats;
+
+            // 3. Update Coins (With Fallbacks)
+            if (userData) {
+                const userObj = userData.user || userData.data || userData; 
+                
+                // Try to find coins
+                if (userObj.coins !== undefined) {
+                    stats.coins = userObj.coins;
+                } else {
+                    const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    if (localUser.coins) {
+                        stats.coins = localUser.coins;
+                    }
+                }
+                stats.level = userObj.level || 1; 
+                stats.currentXp = userObj.xp || 0; 
+            }
+
+            // Recalculate pie chart
             pieSlices = getPieSlices(stats.categories);
         }
     } catch (error) {
@@ -117,46 +143,58 @@
     const total = data.reduce((sum, item) => sum + item.value, 0);
     if (total === 0) return [];
 
-    let cumulativeAngle = -90; // Start at top
+    let cumulativeAngle = -90; 
     
     return data.map(item => {
       const sliceAngle = (item.value / total) * 360;
+      const midAngle = cumulativeAngle + sliceAngle / 2;
       
-      // -- COORDINATE MATH --
-      const startRad = cumulativeAngle * (Math.PI / 180);
-      const endRad = (cumulativeAngle + sliceAngle) * (Math.PI / 180);
-      const midRad = (cumulativeAngle + sliceAngle / 2) * (Math.PI / 180);
+      // -- MATH HELPERS --
+      const rad = (deg) => deg * (Math.PI / 180);
+      const cos = Math.cos(rad(midAngle));
+      const sin = Math.sin(rad(midAngle));
 
-      // 1. Calculate Path (The Slice)
-      const x1 = Math.cos(startRad);
-      const y1 = Math.sin(startRad);
-      const x2 = Math.cos(endRad);
-      const y2 = Math.sin(endRad);
-
+      // 1. Calculate Path
+      // Handle Full Circle edge case
       let path = "";
       if (sliceAngle > 359.9) {
         path = `M 1 0 A 1 1 0 1 1 -1 0 A 1 1 0 1 1 1 0 Z`;
       } else {
+        const x1 = Math.cos(rad(cumulativeAngle));
+        const y1 = Math.sin(rad(cumulativeAngle));
+        const x2 = Math.cos(rad(cumulativeAngle + sliceAngle));
+        const y2 = Math.sin(rad(cumulativeAngle + sliceAngle));
         const largeArc = sliceAngle > 180 ? 1 : 0;
         path = `M 0 0 L ${x1} ${y1} A 1 1 0 ${largeArc} 1 ${x2} ${y2} Z`;
       }
 
-      // 2. Calculate Label Position
-      const labelRadius = 1.9; 
-      const labelX = Math.cos(midRad) * labelRadius;
-      const labelY = Math.sin(midRad) * labelRadius;
-
-      // 3. Calculate Line Coordinates 
-      const lineX1 = Math.cos(midRad) * 0.95;
-      const lineY1 = Math.sin(midRad) * 0.95;
-      const lineX2 = Math.cos(midRad) * 1.45;
-      const lineY2 = Math.sin(midRad) * 1.45;
+      // 2. Dynamic Text Anchor (The Fix!)
+      // If cos > 0 (Right side), align Start (Left). 
+      // If cos < 0 (Left side), align End (Right).
+      const textAnchor = cos >= 0 ? 'start' : 'end';
+      
+      // 3. Calculate Line & Text Positions
+      // We push the text slightly further out (1.8) and add dynamic padding
+      const lineStart = 0.95;
+      const lineEnd = 1.45;
+      const textRadius = 1.6;
+      
+      const lineX1 = cos * lineStart;
+      const lineY1 = sin * lineStart;
+      const lineX2 = cos * lineEnd;
+      const lineY2 = sin * lineEnd;
+      
+      // Add small padding to text so it doesn't touch the line tip
+      const padding = 0.1;
+      const labelX = cos * textRadius + (cos >= 0 ? padding : -padding);
+      const labelY = sin * textRadius;
 
       cumulativeAngle += sliceAngle;
 
       return { 
         ...item, 
         path, 
+        textAnchor, // <--- New Property
         labelX, labelY, 
         lineX1, lineY1, lineX2, lineY2 
       };
@@ -287,28 +325,26 @@
           <img src={frogImage} alt="Frog Traveler" class="relative z-10 w-full drop-shadow-2xl" />
       </div>
 
-  <!-- PIE CHART BOX -->
+ <!-- PIE CHART BOX -->
       <div class="w-full h-80 sm:h-96 rounded-lg border-2 border-[#5C4B35] bg-[#FAF6F0] shadow-inner lg:w-2/3 order-2 lg:order-1 lg:mt-0 flex items-center justify-center p-4 overflow-visible relative z-0">
-          <svg viewBox="-2.2 -2.2 4.4 4.4" class="w-full h-full max-w-[500px] overflow-visible">
-            <!-- 1. Draw Slices -->
+          <!-- Increased viewBox slightly to fit wider text -->
+          <svg viewBox="-2.4 -2.4 4.8 4.8" class="w-full h-full max-w-[500px] overflow-visible">
             {#each pieSlices as slice}
               <path d={slice.path} fill={slice.color} stroke="#FAF6F0" stroke-width="0.02" />
             {/each}
-
-            <!-- 2. Draw Labels & Lines -->
+            
             {#each pieSlices as slice}
-              <!-- Text Label -->
+              <!-- UPDATED: Uses text-anchor={slice.textAnchor} -->
               <text 
                 x={slice.labelX} 
                 y={slice.labelY} 
-                text-anchor="middle" 
+                text-anchor={slice.textAnchor} 
                 dominant-baseline="middle"
                 class="font-['IM_Fell_Great_Primer_SC'] text-[0.22px] fill-[#4F3117] uppercase"
               >
                 {slice.name}: {slice.value}
               </text>
               
-              <!-- Connector Line (Using pre-calculated coordinates) -->
               <line 
                 x1={slice.lineX1} 
                 y1={slice.lineY1} 
