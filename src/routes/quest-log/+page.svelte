@@ -21,6 +21,7 @@
 	let sortByDate = 'none'; // 'none' | 'asc' | 'desc'
 	let filterByCategory = 'all';
 	let searchQuery = '';
+	let formError = '';
 
 	let form = {
 		title: '',
@@ -83,7 +84,7 @@
 					category: task.category,
 					priority: task.priority,
 					originalIndex: index, // Store original order
-					createdAt: task.createdAt || task.created_at || new Date().getTime(), 
+					createdAt: task.createdAt || task.created_at || new Date().getTime(),
 					notes: task.notes || '',
 					suggestions: task.suggestions || '',
 					subtasks: task.subtasks || []
@@ -212,6 +213,13 @@
 	}
 
 	async function submitTask() {
+		formError = '';
+
+		if (!form.title.trim()) {
+			formError = 'Task name is required';
+			return;
+		}
+
 		if (!userId) return;
 
 		const newTask = { ...form, userId };
@@ -298,7 +306,7 @@
 		if (showDetailModal) {
 			closeDetailModal();
 		}
-		
+
 		selectedTask = {
 			...task,
 			notes: task.notes || '',
@@ -322,21 +330,24 @@
 			...selectedTask.subtasks,
 			{ id: Date.now(), text: '', completed: false }
 		];
-		selectedTask = { ...selectedTask }; 
+		selectedTask = { ...selectedTask };
 	}
 
 	function removeSubtask(subtaskId) {
 		if (!selectedTask || !selectedTask.subtasks) return;
-		selectedTask.subtasks = selectedTask.subtasks.filter((/** @type {{ id: any; }} */ st) => st.id !== subtaskId);
-		selectedTask = { ...selectedTask }; 
+		selectedTask.subtasks = selectedTask.subtasks.filter(
+			(/** @type {{ id: any; }} */ st) => st.id !== subtaskId
+		);
+		selectedTask = { ...selectedTask };
 	}
 
 	function toggleSubtask(subtaskId) {
 		if (!selectedTask || !selectedTask.subtasks) return;
-		selectedTask.subtasks = selectedTask.subtasks.map((/** @type {{ id: any; completed: any; }} */ st) =>
-			st.id === subtaskId ? { ...st, completed: !st.completed } : st
+		selectedTask.subtasks = selectedTask.subtasks.map(
+			(/** @type {{ id: any; completed: any; }} */ st) =>
+				st.id === subtaskId ? { ...st, completed: !st.completed } : st
 		);
-		selectedTask = { ...selectedTask }; 
+		selectedTask = { ...selectedTask };
 	}
 
 	async function saveTaskDetails() {
@@ -357,7 +368,9 @@
 
 			if (data.success) {
 				// update task in array
-				const taskIndex = tasks.findIndex((/** @type {{ id: any; }} */ t) => t.id === selectedTask.id);
+				const taskIndex = tasks.findIndex(
+					(/** @type {{ id: any; }} */ t) => t.id === selectedTask.id
+				);
 				if (taskIndex !== -1) {
 					tasks[taskIndex] = {
 						...tasks[taskIndex],
@@ -365,7 +378,7 @@
 						suggestions: selectedTask.suggestions,
 						subtasks: selectedTask.subtasks
 					};
-					tasks = [...tasks]; 
+					tasks = [...tasks];
 					sortTasks();
 				}
 				closeDetailModal();
@@ -523,22 +536,22 @@
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.status}</td>
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.category}</td>
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
-								<div class="flex items-center gap-2 flex-wrap">
+								<div class="flex flex-wrap items-center gap-2">
 									<button
 										on:click={() => openDetailModal(task)}
-										class="rounded bg-[#4F3117] px-3 py-1 text-sm text-white hover:bg-[#3E2612] transition-colors"
+										class="rounded bg-[#4F3117] px-3 py-1 text-sm text-white transition-colors hover:bg-[#3E2612]"
 									>
 										Details
 									</button>
 									{#if task.status !== 'Completed'}
 										<button
 											on:click={() => completeTask(task.id)}
-											class="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700 transition-colors"
+											class="rounded bg-green-600 px-3 py-1 text-sm text-white transition-colors hover:bg-green-700"
 										>
 											✓ Complete
 										</button>
 									{:else}
-										<span class="text-green-600 text-sm">✓ Done</span>
+										<span class="text-sm text-green-600">✓ Done</span>
 									{/if}
 								</div>
 							</td>
@@ -552,193 +565,155 @@
 
 <!-- Modal -->
 {#if showModal}
-	<div class="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-		<div class="w-80 rounded-xl bg-white p-6 shadow-lg">
-			<h2 class="mb-4 font-serif text-xl text-[#4F3117]">Create New Task</h2>
-
-			<input
-				type="text"
-				placeholder="Task Name"
-				class="mb-3 w-full rounded border p-2"
-				bind:value={form.title}
-			/>
-			<button
-				type="button"
-				on:click={openCalendar}
-				class="mb-3 flex w-full items-center justify-between rounded border p-2 text-left text-gray-700"
-			>
-				<span>{form.endDate || 'Pick a date'}</span>
-				<span>📅</span>
-			</button>
-
-			<label for="priority" class="mb-1 block text-sm text-gray-600">Priority</label>
-			<select id="priority" class="mb-3 w-full rounded border p-2" bind:value={form.priority}>
-				<option value="Low">Low</option>
-				<option value="Medium">Medium</option>
-				<option value="High">High</option>
-			</select>
-
-			<label for="category" class="mb-1 block text-sm text-gray-600">Category</label>
-			<select id="category" class="mb-3 w-full rounded border p-2" bind:value={form.category}>
-				<option value="">Select Category</option>
-				<option value="Study">Study</option>
-				<option value="Work">Work</option>
-				<option value="Chores">Chores</option>
-				<option value="Health">Health</option>
-				<option value="Reading">Reading</option>
-			</select>
-
-			<div class="mt-4 flex gap-2">
-				<button class="flex-1 rounded-lg bg-[#F5E8D9] py-2 text-[#4F3117]" on:click={submitTask}>
-					Submit
-				</button>
-				<button
-					class="flex-1 rounded-lg bg-gray-300 py-2 text-[#4F3117]"
-					on:click={() => (showModal = false)}
-				>
-					Cancel
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
-
-{#if showDetailModal && selectedTask}
-	<div
-		class="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-4"
-		on:click={closeDetailModal}
-		on:keydown={(e) => e.key === 'Escape' && closeDetailModal()}
-		role="button"
-		tabindex="0"
-	>
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
 		<div
-			class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-[#F8F3ED] p-6 shadow-2xl border-2 border-[#4F3117]"
-			on:click|stopPropagation
-			on:keydown|stopPropagation
-			role="dialog"
-			tabindex="-1"
+			class="
+				w-[520px] max-w-[90vw]
+				rounded-xl
+				border-[6px] border-double border-[#ad8a6c]
+				bg-[#fdf3e7]
+				p-0
+				font-['IM_Fell_Great_Primer_SC']
+				shadow-[0_0_20px_rgba(0,0,0,0.5)]
+			"
 		>
-			<!-- header with close button -->
-			<div class="flex items-center justify-between mb-6">
-				<h2 class="font-serif text-2xl sm:text-3xl text-[#4F3117]">{selectedTask.title}</h2>
+			<!-- Header -->
+			<div
+				class="
+					flex items-center justify-between
+					border-b-2
+					border-[#ad8a6c] px-6
+					py-4 text-[#4F3117]
+				"
+			>
+				<h2 class="text-2xl">Create New Task</h2>
+
 				<button
-					on:click={closeDetailModal}
-					class="text-[#4F3117] hover:text-[#3E2612] text-2xl font-bold transition-colors"
-					aria-label="Close"
+					on:click={() => (showModal = false)}
+					class="
+						cursor-pointer border-none
+						bg-transparent text-xl
+						text-[#4F3117]
+						transition-transform duration-200
+						hover:rotate-12
+					"
 				>
-					×
+					✖
 				</button>
 			</div>
 
-			<!-- info of task -->
-			<div class="mb-6 grid grid-cols-2 gap-4 text-sm sm:text-base">
-				<div>
-					<span class="font-semibold text-[#4F3117]">Priority:</span>
-					<span
-						class={selectedTask.priority === 'High'
-							? 'ml-2 font-bold text-red-600'
-							: selectedTask.priority === 'Medium'
-								? 'ml-2 text-orange-600'
-								: 'ml-2 text-green-600'}
-					>
-						{selectedTask.priority || 'Medium'}
-					</span>
-				</div>
-				<div>
-					<span class="font-semibold text-[#4F3117]">Category:</span>
-					<span class="ml-2 text-[#4F3117]">{selectedTask.category || 'N/A'}</span>
-				</div>
-				<div>
-					<span class="font-semibold text-[#4F3117]">End Date:</span>
-					<span class="ml-2 text-[#4F3117]">{selectedTask.end || 'No date set'}</span>
-				</div>
-				<div>
-					<span class="font-semibold text-[#4F3117]">Status:</span>
-					<span class="ml-2 text-[#4F3117]">{selectedTask.status}</span>
-				</div>
-			</div>
+			<!-- Content -->
+			<div class="space-y-4 p-6 text-[#4F3117]">
+				<input
+					type="text"
+					placeholder="Task Name"
+					bind:value={form.title}
+					class="
+		w-full rounded
+		border-2
+		bg-[#fff8e1]
+		p-2
+		text-lg
+		focus:outline-none
+		{formError
+						? 'border-red-600 focus:ring-2 focus:ring-red-400'
+						: 'border-[#ad8a6c] focus:ring-2 focus:ring-[#ad8a6c]'}
+	"
+				/>
+				{#if formError}
+					<p class="text-sm text-red-600">
+						{formError}
+					</p>
+				{/if}
 
-			<!-- fied to add notes -->
-			<div class="mb-6">
-				<label for="notes" class="block mb-2 font-semibold text-[#4F3117] text-lg">Notes</label>
-				<textarea
-					id="notes"
-					bind:value={selectedTask.notes}
-					placeholder="Add your notes here..."
-					class="w-full min-h-[100px] rounded-lg border-2 border-[#4F3117] bg-white p-3 text-[#4F3117] placeholder-[#A89078] focus:outline-none focus:ring-2 focus:ring-[#4F3117] resize-y"
-				></textarea>
-			</div>
-
-			<!-- add suggestions -->
-			<div class="mb-6">
-				<label for="suggestions" class="block mb-2 font-semibold text-[#4F3117] text-lg"
-					>Suggestions</label
+				<button
+					type="button"
+					on:click={openCalendar}
+					class="
+						flex w-full items-center justify-between
+						rounded
+						border-2 border-[#ad8a6c]
+						bg-[#fff8e1]
+						p-2
+						text-lg
+						transition-all
+						hover:bg-[#f1e0c5]
+					"
 				>
-				<textarea
-					id="suggestions"
-					bind:value={selectedTask.suggestions}
-					placeholder="Add suggestions or tips here..."
-					class="w-full min-h-[100px] rounded-lg border-2 border-[#4F3117] bg-white p-3 text-[#4F3117] placeholder-[#A89078] focus:outline-none focus:ring-2 focus:ring-[#4F3117] resize-y"
-				></textarea>
-			</div>
+					<span>{form.endDate || 'Pick a date'}</span>
+					<span>📅</span>
+				</button>
 
-			<!-- add subtasks/test version -->
-			<div class="mb-6">
-				<div class="flex items-center justify-between mb-3">
-					<h3 class="block font-semibold text-[#4F3117] text-lg">Subtasks</h3>
-					<button
-						on:click={addSubtask}
-						class="rounded-lg bg-[#4F3117] px-3 py-1.5 text-sm text-white hover:bg-[#3E2612] transition-colors"
+				<div>
+					<label class="mb-1 block text-sm">Priority</label>
+					<select
+						bind:value={form.priority}
+						class="
+							w-full rounded
+							border-2 border-[#ad8a6c]
+							bg-[#fff8e1]
+							p-2
+							text-lg
+						"
 					>
-						+ Add Subtask
+						<option value="Low">Low</option>
+						<option value="Medium">Medium</option>
+						<option value="High">High</option>
+					</select>
+				</div>
+
+				<div>
+					<label class="mb-1 block text-sm">Category</label>
+					<select
+						bind:value={form.category}
+						class="
+							w-full rounded
+							border-2 border-[#ad8a6c]
+							bg-[#fff8e1]
+							p-2
+							text-lg
+						"
+					>
+						<option value="">Select Category</option>
+						<option value="Study">Study</option>
+						<option value="Work">Work</option>
+						<option value="Chores">Chores</option>
+						<option value="Health">Health</option>
+						<option value="Reading">Reading</option>
+					</select>
+				</div>
+
+				<div class="mt-6 flex gap-3">
+					<button
+						class="
+							flex-1 rounded-lg
+							border-2 border-[#ad8a6c]
+							bg-[#fff8e1]
+							py-2
+							text-lg
+							transition-all
+							hover:bg-[#f1e0c5]
+						"
+						on:click={submitTask}
+					>
+						Submit
+					</button>
+
+					<button
+						class="
+							flex-1 rounded-lg
+							border-2 border-[#ad8a6c]
+							bg-[#e0d3c2]
+							py-2
+							text-lg
+							transition-all
+							hover:bg-[#d2c1aa]
+						"
+						on:click={() => (showModal = false)}
+					>
+						Cancel
 					</button>
 				</div>
-				<div class="space-y-2 max-h-[200px] overflow-y-auto">
-					{#if selectedTask.subtasks && selectedTask.subtasks.length > 0}
-						{#each selectedTask.subtasks as subtask}
-							<div class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white p-3">
-								<input
-									type="checkbox"
-									checked={subtask.completed}
-									on:change={() => toggleSubtask(subtask.id)}
-									class="w-5 h-5 text-[#4F3117] rounded focus:ring-2 focus:ring-[#4F3117] cursor-pointer"
-								/>
-								<input
-									type="text"
-									bind:value={subtask.text}
-									placeholder="Subtask description..."
-									class="flex-1 border-none bg-transparent text-[#4F3117] placeholder-[#A89078] focus:outline-none {subtask.completed
-										? 'line-through text-gray-500'
-										: ''}"
-								/>
-								<button
-									on:click={() => removeSubtask(subtask.id)}
-									class="text-red-600 hover:text-red-800 text-lg font-bold transition-colors"
-									aria-label="Remove subtask"
-								>
-									×
-								</button>
-							</div>
-						{/each}
-					{:else}
-						<p class="text-gray-500 text-sm italic">No subtasks yet. Click "Add Subtask" to create one.</p>
-					{/if}
-				</div>
-			</div>
-
-			<div class="flex gap-3">
-				<button
-					on:click={saveTaskDetails}
-					class="flex-1 rounded-lg bg-[#4F3117] py-2.5 text-white font-medium hover:bg-[#3E2612] transition-colors"
-				>
-					Save Changes
-				</button>
-				<button
-					on:click={closeDetailModal}
-					class="flex-1 rounded-lg bg-gray-300 py-2.5 text-[#4F3117] font-medium hover:bg-gray-400 transition-colors"
-				>
-					Cancel
-				</button>
 			</div>
 		</div>
 	</div>
