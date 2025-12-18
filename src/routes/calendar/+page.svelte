@@ -64,7 +64,7 @@
 
 	function renderCalendar() {
 		const events = tasks.map((task) => {
-			const color = getEventColor(task.status); // 👈 关键
+			const color = getEventColor(task.status);
 
 			return {
 				id: task.id,

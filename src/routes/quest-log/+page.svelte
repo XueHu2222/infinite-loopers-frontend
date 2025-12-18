@@ -511,11 +511,14 @@
 						class="w-full rounded border-2 bg-[#fff8e1] p-2 text-base sm:text-lg"
 					>
 						<option value="">Select Category</option>
-						<option value="Study">Study</option>
 						<option value="Work">Work</option>
+						<option value="Study">Study</option>
 						<option value="Chores">Chores</option>
-						<option value="Health">Health</option>
+						<option value="Wellness">Wellness</option>
 						<option value="Reading">Reading</option>
+						<option value="Hobbies">Hobbies</option>
+						<option value="Social">Social</option>
+						<option value="Events">Events</option>
 					</select>
 				</div>
 				<div class="mt-4 flex flex-col gap-3 sm:flex-row">
