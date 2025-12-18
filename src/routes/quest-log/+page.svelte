@@ -267,7 +267,7 @@
 </script>
 
 <div class="min-h-screen bg-[#F8F3ED] p-4 font-serif sm:p-6">
-	<h1 class="mb-4 text-center text-2xl tracking-wide text-[#4F3117] sm:text-3xl md:text-4xl">
+	<h1 class="mb-8 text-center text-2xl font-['IM_Fell_Great_Primer_SC'] tracking-wide text-[#4F3117] sm:text-3xl md:text-4xl">
 		Quest List
 	</h1>
 
@@ -277,7 +277,7 @@
 			type="text"
 			placeholder="Search tasks by name..."
 			bind:value={searchQuery}
-			class="w-full rounded-lg border border-[#4F3117] bg-white px-2 py-1 text-sm shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
+			class="w-full rounded-lg font-['Inter',sans-serif] border border-[#4F3117] bg-white px-2 py-1 text-sm shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
 		/>
 	</div>
 
@@ -285,11 +285,11 @@
 	<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 		<button
 			on:click={addTask}
-			class="w-full rounded-xl bg-[#F5E8D9] px-3 py-2 text-xl text-[#4F3117] shadow-md hover:opacity-70 sm:w-auto sm:px-4 sm:py-3 sm:text-2xl"
-			>+ Add Quest</button
+			class="w-full rounded-xl bg-[#F5E8D9] px-3 py-2 font-['Inter',sans-serif] font-semibold text-md text-[#4F3117] shadow-md hover:opacity-70 sm:w-auto sm:px-4 sm:py-3 sm:text-lg"
+			>+ Add Quest </button
 		>
 
-		<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+		<div class="flex flex-wrap items-center gap-2 sm:gap-3 font-['Inter',sans-serif] font-semibold">
 			<!-- Category -->
 			<div class="flex flex-wrap gap-2">
 				{#each ['all', 'study', 'housework', 'fitness'] as cat}
@@ -325,8 +325,8 @@
 	<!-- desktop -->
 	<div class="hidden overflow-x-auto sm:block">
 		<table class="w-full border-separate border-spacing-y-2 sm:border-spacing-y-4">
-			<thead>
-				<tr class="text-lg text-[#4F3117] sm:text-xl">
+			<thead class="font-['Inter',sans-serif] font-semibold text-lg text-[#4F3117]">
+				<tr>
 					<th class="px-2 py-2 text-left sm:px-4">Quest</th>
 					<th class="px-2 py-2 text-left sm:px-4">End day</th>
 					<th class="px-2 py-2 text-left sm:px-4">Priority</th>
@@ -337,10 +337,10 @@
 			</thead>
 			<tbody>
 				{#each sortedTasks as task}
-					<tr class="rounded-xl bg-[#F4E9D8] shadow-md">
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.title}</td>
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.end}</td>
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
+					<tr class="rounded-xl  bg-[#F4E9D8] font-['Inter',sans-serif] font-semibold shadow-md text-[#4F3117]">
+						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-md">{task.title}</td>
+						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-md">{task.end}</td>
+						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-md">
 							<span
 								class={task.priority === 'High'
 									? 'font-bold text-red-600'
@@ -351,20 +351,20 @@
 								{task.priority || 'Medium'}
 							</span>
 						</td>
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.status}</td>
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.category}</td>
-						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
+						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-md">{task.status}</td>
+						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-md">{task.category}</td>
+						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-md">
 							<div class="flex flex-wrap items-center gap-2">
 								<button
 									on:click={() => openDetailModal(task.id)}
-									class="rounded bg-[#4F3117] px-3 py-1 text-sm text-white hover:bg-[#3E2612]"
+									class="rounded bg-[#4F3117] font-normal px-3 py-1 text-sm text-white hover:bg-[#3E2612]"
 									>Details</button
 								>
 								{#if task.status !== 'Completed'}
 									<button
 										on:click={() => completeTask(task.id)}
-										class="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
-										>✓ Complete</button
+										class="rounded bg-green-600 px-3 py-1 font-normal text-sm text-white hover:bg-green-700"
+										> Complete</button
 									>
 								{:else}
 									<span class="text-sm text-green-600">✓ Done</span>
@@ -378,11 +378,11 @@
 	</div>
 
 	<!-- mobile -->
-	<div class="flex flex-col gap-4 sm:hidden">
+	<div class="flex flex-col gap-4 sm:hidden text-[#4F3117]">
 		{#each sortedTasks as task}
-			<div class="rounded-xl bg-[#F4E9D8] p-4 shadow-md">
+			<div class="rounded-xl bg-[#F4E9D8] font-['Inter',sans-serif] font-semibold p-4 shadow-md">
 				<div class="mb-2 flex items-center justify-between">
-					<h3 class="text-lg font-semibold">{task.title}</h3>
+					<h3 class="text-lg text-[#4F3117]">{task.title}</h3>
 					<span
 						class={task.priority === 'High'
 							? 'text-red-600'
@@ -393,20 +393,20 @@
 						{task.priority || 'Medium'}
 					</span>
 				</div>
-				<p class="text-sm text-gray-700">End: {task.end}</p>
-				<p class="text-sm text-gray-700">Status: {task.status}</p>
-				<p class="text-sm text-gray-700">Category: {task.category}</p>
+				<p class="text-sm">End: {task.end}</p>
+				<p class="text-sm">Status: {task.status}</p>
+				<p class="text-sm">Category: {task.category}</p>
 				<div class="mt-2 flex flex-wrap gap-2">
 					<button
 						on:click={() => openDetailModal(task.id)}
-						class="rounded bg-[#4F3117] px-3 py-1 text-sm text-white hover:bg-[#3E2612]"
+						class="rounded bg-[#4F3117] px-3 py-1 font-normal text-sm text-white hover:bg-[#3E2612]"
 						>Details</button
 					>
 					{#if task.status !== 'Completed'}
 						<button
 							on:click={() => completeTask(task.id)}
-							class="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
-							>✓ Complete</button
+							class="rounded bg-green-600 px-3 py-1 font-normal text-sm text-white hover:bg-green-700"
+							> Complete</button
 						>
 					{:else}
 						<span class="text-sm text-green-600">✓ Done</span>
@@ -451,8 +451,8 @@
 					>{form.endDate || 'Pick a date'} <span>📅</span></button
 				>
 				<div>
-					<label class="mb-1 block text-sm">Priority</label>
-					<select
+					<label class="mb-1 block text-sm" for="priority">Priority</label>
+					<select id="priority"
 						bind:value={form.priority}
 						class="w-full rounded border-2 bg-[#fff8e1] p-2 text-base sm:text-lg"
 					>
@@ -462,8 +462,8 @@
 					</select>
 				</div>
 				<div>
-					<label class="mb-1 block text-sm">Category</label>
-					<select
+					<label class="mb-1 block text-sm" for="category">Category</label>
+					<select id="category"
 						bind:value={form.category}
 						class="w-full rounded border-2 bg-[#fff8e1] p-2 text-base sm:text-lg"
 					>
