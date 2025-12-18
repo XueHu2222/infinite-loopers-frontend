@@ -9,8 +9,6 @@
 	import medal from '$lib/assets/medal.png';
 	import achievementsRectangle from '$lib/assets/achievements_rectangle.png';
 
-	export let items = [];
-
 	$: currentPath = $page.url.pathname;
 
 	let user = null;
