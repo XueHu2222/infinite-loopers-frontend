@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import logo from '$lib/assets/logo.png';
+	import logo from '$lib/assets/Logo.png';
 
 	// Your actual image imports
 	import knight from '$lib/assets/achievements_knight.png';
@@ -143,7 +143,7 @@
 			<!-- ACHIEVEMENTS -->
 			<section class="relative">
 				<!-- Left Knight Character with drop-shaped background -->
-				<div class="absolute top-[-20px] left-[-250px] hidden xl:block">
+				<div class="absolute -top-5 left-[-250px] hidden xl:block">
 					<div
 						class="bg-[#3E3845] p-10"
 						style="width: 520px; height: 580px; border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%; display: flex; align-items: center; justify-content: center;"
@@ -153,7 +153,7 @@
 				</div>
 
 				<!-- Right Mage Character with drop-shaped background -->
-				<div class="absolute right-[-250px] bottom-[-20px] hidden xl:block">
+				<div class="absolute right-[-250px] -bottom-5 hidden xl:block">
 					<div
 						class="bg-[#3E3845] p-10"
 						style="width: 520px; height: 580px; border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%; display: flex; align-items: center; justify-content: center;"
@@ -169,7 +169,7 @@
 							<button
 								type="button"
 								on:click={() => handleAchievementClick(ach)}
-								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:translate-y-[-2px]"
+								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:-translate-y-0.5"
 								style="border: 5px solid #6e5c3d;"
 							>
 								{#if ach.unlocked}
@@ -201,7 +201,7 @@
 							<button
 								type="button"
 								on:click={() => handleAchievementClick(ach)}
-								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:translate-y-[-2px]"
+								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:-translate-y-0.5"
 								style="border: 5px solid #6e5c3d;"
 							>
 								{#if ach.unlocked}
@@ -233,7 +233,7 @@
 							<button
 								type="button"
 								on:click={() => handleAchievementClick(ach)}
-								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:translate-y-[-2px]"
+								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:-translate-y-0.5"
 								style="border: 5px solid #6e5c3d;"
 							>
 								{#if ach.unlocked}
@@ -265,7 +265,7 @@
 							<button
 								type="button"
 								on:click={() => handleAchievementClick(ach)}
-								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:translate-y-[-2px]"
+								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:-translate-y-0.5"
 								style="border: 5px solid #6e5c3d;"
 							>
 								{#if ach.unlocked}
