@@ -286,6 +286,27 @@
 			openModal('Failed to complete task', 'error');
 		}
 	}
+
+	async function deleteTask(taskId) {
+		try {
+			const res = await fetch(`http://localhost:3010/tasks/${taskId}`, {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' }
+			});
+
+			const data = await res.json();
+
+			if (data.success) {
+				await loadTasks(); // Reloads tasks
+				openModal('✓ Quest deleted successfully!', 'success');
+			} else {
+				openModal(data.message || 'Failed to delete quest', 'error');
+			}
+		} catch (err) {
+			console.error('Error deleting task:', err);
+			openModal('Failed to delete quest', 'error');
+		}
+	}
 </script>
 
 <div class="min-h-screen bg-[#F8F3ED] p-4 font-serif sm:p-6">
@@ -431,7 +452,6 @@
 							</td>
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.status}</td>
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.category}</td>
-							<!-- ADD THIS ENTIRE <td> BLOCK -->
 							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
 								{#if task.status !== 'Completed'}
 									<button
@@ -443,6 +463,13 @@
 								{:else}
 									<span class="text-green-600">✓ Completed</span>
 								{/if}
+								<button
+									on:click={() => deleteTask(task.id)}
+									class="rounded  px-3 py-1 ml-12  text-red-700 transition-colors hover:bg-red-200 "
+									title="Delete quest"
+								>
+									Delete
+								</button>
 							</td>
 						</tr>
 					{/each}
