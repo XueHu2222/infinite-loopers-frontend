@@ -192,7 +192,10 @@
 		}
 	}
 
-	function openDetailModal(task) {
+	function openDetailModal(taskId) {
+		const task = tasks.find((t) => t.id === taskId);
+		if (!task) return;
+
 		selectedTask = {
 			...task,
 			notes: task.notes || '',
@@ -201,6 +204,7 @@
 		};
 		showDetailModal = true;
 	}
+
 	function closeDetailModal() {
 		showDetailModal = false;
 		selectedTask = null;
@@ -352,7 +356,7 @@
 						<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
 							<div class="flex flex-wrap items-center gap-2">
 								<button
-									on:click={() => openDetailModal(task)}
+									on:click={() => openDetailModal(task.id)}
 									class="rounded bg-[#4F3117] px-3 py-1 text-sm text-white hover:bg-[#3E2612]"
 									>Details</button
 								>
@@ -394,7 +398,7 @@
 				<p class="text-sm text-gray-700">Category: {task.category}</p>
 				<div class="mt-2 flex flex-wrap gap-2">
 					<button
-						on:click={() => openDetailModal(task)}
+						on:click={() => openDetailModal(task.id)}
 						class="rounded bg-[#4F3117] px-3 py-1 text-sm text-white hover:bg-[#3E2612]"
 						>Details</button
 					>
@@ -483,6 +487,149 @@
 						Cancel
 					</button>
 				</div>
+			</div>
+		</div>
+	</div>
+{/if}
+
+
+
+{#if showDetailModal && selectedTask}
+	<div
+		class="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-4"
+		on:click={closeDetailModal}
+		on:keydown={(e) => e.key === 'Escape' && closeDetailModal()}
+		role="button"
+		tabindex="0"
+	>
+		<div
+			class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-[#F8F3ED] p-6 shadow-2xl border-2 border-[#4F3117]"
+			on:click|stopPropagation
+			on:keydown|stopPropagation
+			role="dialog"
+			tabindex="-1"
+		>
+			<!-- header with close button -->
+			<div class="flex items-center justify-between mb-6">
+				<h2 class="font-serif text-2xl sm:text-3xl text-[#4F3117]">{selectedTask.title}</h2>
+				<button
+					on:click={closeDetailModal}
+					class="text-[#4F3117] hover:text-[#3E2612] text-2xl font-bold transition-colors"
+					aria-label="Close"
+				>
+					×
+				</button>
+			</div>
+
+			<!-- info of task -->
+			<div class="mb-6 grid grid-cols-2 gap-4 text-sm sm:text-base">
+				<div>
+					<span class="font-semibold text-[#4F3117]">Priority:</span>
+					<span
+						class={selectedTask.priority === 'High'
+							? 'ml-2 font-bold text-red-600'
+							: selectedTask.priority === 'Medium'
+								? 'ml-2 text-orange-600'
+								: 'ml-2 text-green-600'}
+					>
+						{selectedTask.priority || 'Medium'}
+					</span>
+				</div>
+				<div>
+					<span class="font-semibold text-[#4F3117]">Category:</span>
+					<span class="ml-2 text-[#4F3117]">{selectedTask.category || 'N/A'}</span>
+				</div>
+				<div>
+					<span class="font-semibold text-[#4F3117]">End Date:</span>
+					<span class="ml-2 text-[#4F3117]">{selectedTask.end || 'No date set'}</span>
+				</div>
+				<div>
+					<span class="font-semibold text-[#4F3117]">Status:</span>
+					<span class="ml-2 text-[#4F3117]">{selectedTask.status}</span>
+				</div>
+			</div>
+
+			<!-- fied to add notes -->
+			<div class="mb-6">
+				<label for="notes" class="block mb-2 font-semibold text-[#4F3117] text-lg">Notes</label>
+				<textarea
+					id="notes"
+					bind:value={selectedTask.notes}
+					placeholder="Add your notes here..."
+					class="w-full min-h-[100px] rounded-lg border-2 border-[#4F3117] bg-white p-3 text-[#4F3117] placeholder-[#A89078] focus:outline-none focus:ring-2 focus:ring-[#4F3117] resize-y"
+				></textarea>
+			</div>
+
+			<!-- add suggestions -->
+			<div class="mb-6">
+				<label for="suggestions" class="block mb-2 font-semibold text-[#4F3117] text-lg"
+					>Suggestions</label
+				>
+				<textarea
+					id="suggestions"
+					bind:value={selectedTask.suggestions}
+					placeholder="Add suggestions or tips here..."
+					class="w-full min-h-[100px] rounded-lg border-2 border-[#4F3117] bg-white p-3 text-[#4F3117] placeholder-[#A89078] focus:outline-none focus:ring-2 focus:ring-[#4F3117] resize-y"
+				></textarea>
+			</div>
+
+			<!-- add subtasks/test version -->
+			<div class="mb-6">
+				<div class="flex items-center justify-between mb-3">
+					<h3 class="block font-semibold text-[#4F3117] text-lg">Subtasks</h3>
+					<button
+						on:click={addSubtask}
+						class="rounded-lg bg-[#4F3117] px-3 py-1.5 text-sm text-white hover:bg-[#3E2612] transition-colors"
+					>
+						+ Add Subtask
+					</button>
+				</div>
+				<div class="space-y-2 max-h-[200px] overflow-y-auto">
+					{#if selectedTask.subtasks && selectedTask.subtasks.length > 0}
+						{#each selectedTask.subtasks as subtask}
+							<div class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white p-3">
+								<input
+									type="checkbox"
+									checked={subtask.completed}
+									on:change={() => toggleSubtask(subtask.id)}
+									class="w-5 h-5 text-[#4F3117] rounded focus:ring-2 focus:ring-[#4F3117] cursor-pointer"
+								/>
+								<input
+									type="text"
+									bind:value={subtask.text}
+									placeholder="Subtask description..."
+									class="flex-1 border-none bg-transparent text-[#4F3117] placeholder-[#A89078] focus:outline-none {subtask.completed
+										? 'line-through text-gray-500'
+										: ''}"
+								/>
+								<button
+									on:click={() => removeSubtask(subtask.id)}
+									class="text-red-600 hover:text-red-800 text-lg font-bold transition-colors"
+									aria-label="Remove subtask"
+								>
+									×
+								</button>
+							</div>
+						{/each}
+					{:else}
+						<p class="text-gray-500 text-sm italic">No subtasks yet. Click "Add Subtask" to create one.</p>
+					{/if}
+				</div>
+			</div>
+
+			<div class="flex gap-3">
+				<button
+					on:click={saveTaskDetails}
+					class="flex-1 rounded-lg bg-[#4F3117] py-2.5 text-white font-medium hover:bg-[#3E2612] transition-colors"
+				>
+					Save Changes
+				</button>
+				<button
+					on:click={closeDetailModal}
+					class="flex-1 rounded-lg bg-gray-300 py-2.5 text-[#4F3117] font-medium hover:bg-gray-400 transition-colors"
+				>
+					Cancel
+				</button>
 			</div>
 		</div>
 	</div>
