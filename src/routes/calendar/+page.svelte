@@ -9,7 +9,7 @@
 	let tasks = [];
 	let userId = null;
 	let isSelectingDate = sessionStorage.getItem('isSelectingDate') === 'true';
-
+	
 	const STATUS = {
 		COMPLETED: 'Completed',
 		IN_PROGRESS: 'In Progress',
@@ -64,7 +64,7 @@
 
 	function renderCalendar() {
 		const events = tasks.map((task) => {
-			const color = getEventColor(task.status);
+			const color = getEventColor(task.status); // 👈 关键
 
 			return {
 				id: task.id,
