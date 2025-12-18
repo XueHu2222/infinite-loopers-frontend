@@ -3,15 +3,8 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	/**
-	 * @type { any[]}
-	 */
 	let tasks = [];
-
-	/** @type {any[]} */
 	let sortedTasks = [];
-
-	/** @type {any[]} */
 	let originalTasksOrder = [];
 
 	let showModal = false;
@@ -21,24 +14,15 @@
 	let sortByDate = 'none'; // 'none' | 'asc' | 'desc'
 	let filterByCategory = 'all';
 	let searchQuery = '';
+	let formError = '';
 
-	let form = {
-		title: '',
-		endDate: '',
-		category: '',
-		priority: 'Medium'
-	};
-
-	/**
-	 * @type {null}
-	 */
+	let form = { title: '', endDate: '', category: '', priority: 'Medium' };
 	let userId = null;
 	let email = '';
 	let error = '';
 
 	onMount(async () => {
 		const storedUser = localStorage.getItem('user');
-
 		if (!storedUser) {
 			error = 'No user found, please login first.';
 			return;
@@ -54,10 +38,8 @@
 
 		if (tempForm) {
 			form = JSON.parse(tempForm);
-			if (isSelectingDate) {
-				if (selectedDate) form.endDate = selectedDate;
-				showModal = true;
-			}
+			if (isSelectingDate && selectedDate) form.endDate = selectedDate;
+			showModal = isSelectingDate;
 			sessionStorage.removeItem('tempForm');
 			sessionStorage.removeItem('isSelectingDate');
 			sessionStorage.removeItem('selectedDate');
@@ -68,27 +50,23 @@
 
 	async function loadTasks() {
 		if (!userId) return;
-
 		try {
 			const res = await fetch(`http://localhost:3010/tasks/${userId}`);
-			// const res = await fetch(`http://localhost:3010/tasks/${userId}`);
 			const data = await res.json();
-
 			if (data.success) {
-				tasks = data.tasks.map((/** @type {any} */ task, index) => ({
+				tasks = data.tasks.map((task, index) => ({
 					id: task.id,
 					title: task.title,
 					end: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '',
 					status: task.status,
 					category: task.category,
 					priority: task.priority,
-					originalIndex: index, // Store original order
+					originalIndex: index,
 					createdAt: task.createdAt || task.created_at || new Date().getTime(),
 					notes: task.notes || '',
 					suggestions: task.suggestions || '',
 					subtasks: task.subtasks || []
 				}));
-				// Store original order
 				originalTasksOrder = [...tasks];
 				sortTasks();
 			} else {
@@ -107,157 +85,81 @@
 	function openCalendar() {
 		sessionStorage.setItem('tempForm', JSON.stringify(form));
 		sessionStorage.setItem('isSelectingDate', 'true');
-
 		goto('/calendar');
 	}
 
 	function sortTasks() {
-		let filteredTasks = tasks;
-		if (searchQuery.trim() !== '') {
-			const query = searchQuery.toLowerCase().trim();
-			filteredTasks = filteredTasks.filter((/** @type {any} */ task) =>
-				task.title.toLowerCase().includes(query)
-			);
-		}
-
-		if (filterByCategory !== 'all') {
-			filteredTasks = filteredTasks.filter(
-				(/** @type {any} */ task) => task.category.toLowerCase() === filterByCategory.toLowerCase()
-			);
-		}
+		let filtered = tasks.filter(
+			(t) =>
+				t.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+				(filterByCategory === 'all' || t.category.toLowerCase() === filterByCategory.toLowerCase())
+		);
 
 		if (sortByPriority === 'none' && sortByDate === 'none') {
-			// Sort by original index or createdAt to restore original order
-			sortedTasks = [...filteredTasks].sort((/** @type {any} */ a, /** @type {any} */ b) => {
-				if (a.originalIndex !== undefined && b.originalIndex !== undefined) {
-					return a.originalIndex - b.originalIndex;
-				}
-				// Fallback to createdAt if available
-				const aTime = a.createdAt || 0;
-				const bTime = b.createdAt || 0;
-				return aTime - bTime;
-			});
+			sortedTasks = [...filtered].sort((a, b) => (a.originalIndex ?? 0) - (b.originalIndex ?? 0));
 			return;
 		}
 
-		/** @type {{ [key: string]: number }} */
 		const priorityOrder = { High: 3, Medium: 2, Low: 1 };
 
-		sortedTasks = [...filteredTasks].sort((/** @type {any} */ a, /** @type {any} */ b) => {
-			// Priority sorting
+		sortedTasks = [...filtered].sort((a, b) => {
 			if (sortByPriority !== 'none') {
-				const aPriorityValue = a.priority || 'Medium';
-				const bPriorityValue = b.priority || 'Medium';
-				const aPriority = priorityOrder[aPriorityValue] || 2;
-				const bPriority = priorityOrder[bPriorityValue] || 2;
-
-				let priorityDiff = 0;
-				if (sortByPriority === 'desc') {
-					priorityDiff = bPriority - aPriority;
-				} else if (sortByPriority === 'asc') {
-					priorityDiff = aPriority - bPriority;
-				}
-
-				// If priorities are different, return the difference
-				if (priorityDiff !== 0) {
-					return priorityDiff;
-				}
+				const diff = (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
+				if (diff !== 0) return sortByPriority === 'asc' ? diff : -diff;
 			}
-
-			// Date sorting (as secondary sort or primary if priority is none)
 			if (sortByDate !== 'none') {
-				const aDate = a.end ? new Date(a.end).getTime() : 0;
-				const bDate = b.end ? new Date(b.end).getTime() : 0;
-
-				// Handle empty dates - put them at the end
-				if (!a.end && !b.end) return 0;
-				if (!a.end) return 1;
-				if (!b.end) return -1;
-
-				if (sortByDate === 'desc') {
-					return bDate - aDate;
-				} else if (sortByDate === 'asc') {
-					return aDate - bDate;
-				}
+				const aTime = a.end ? new Date(a.end).getTime() : 0;
+				const bTime = b.end ? new Date(b.end).getTime() : 0;
+				return sortByDate === 'asc' ? aTime - bTime : bTime - aTime;
 			}
-
 			return 0;
 		});
 	}
 
 	function toggleSortPriority() {
-		if (sortByPriority === 'none') {
-			sortByPriority = 'asc';
-		} else if (sortByPriority === 'asc') {
-			sortByPriority = 'desc';
-		} else {
-			sortByPriority = 'none';
-		}
-		// Reactive statement will automatically call sortTasks()
+		sortByPriority = sortByPriority === 'none' ? 'asc' : sortByPriority === 'asc' ? 'desc' : 'none';
 	}
-
 	function toggleSortDate() {
-		if (sortByDate === 'none') {
-			sortByDate = 'asc';
-		} else if (sortByDate === 'asc') {
-			sortByDate = 'desc';
-		} else {
-			sortByDate = 'none';
-		}
-		// Reactive statement will automatically call sortTasks()
+		sortByDate = sortByDate === 'none' ? 'asc' : sortByDate === 'asc' ? 'desc' : 'none';
 	}
 
-	$: if (tasks.length > 0 || sortByPriority || sortByDate || filterByCategory || searchQuery) {
+	$: if (tasks.length || sortByPriority || sortByDate || filterByCategory || searchQuery)
 		sortTasks();
-	}
 
 	async function submitTask() {
+		formError = '';
+		if (!form.title.trim()) {
+			formError = 'Task name is required';
+			return;
+		}
 		if (!userId) return;
-
-		const newTask = { ...form, userId };
 
 		try {
 			const res = await fetch(`http://localhost:3011/tasks/${userId}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(newTask)
+				body: JSON.stringify({ ...form, userId })
 			});
-
-			// try {
-			// 	const res = await fetch(`http://localhost:3010/tasks/${userId}`, {
-			// 		method: "POST",
-			// 		headers: { "Content-Type": "application/json" },
-			// 		body: JSON.stringify(newTask)
-			// 	});
-
 			const data = await res.json();
-
 			if (data.success) {
-				const newTask = {
+				const newT = {
 					id: data.task.id,
 					title: data.task.title,
 					end: data.task.endDate ? new Date(data.task.endDate).toISOString().split('T')[0] : '',
 					status: data.task.status,
 					category: data.task.category,
 					priority: data.task.priority,
-					originalIndex: tasks.length, // New task gets last index
+					originalIndex: tasks.length,
 					createdAt: data.task.createdAt || data.task.created_at || new Date().getTime(),
 					notes: data.task.notes || '',
 					suggestions: data.task.suggestions || '',
 					subtasks: data.task.subtasks || []
 				};
-				tasks = [...tasks, newTask];
+				tasks = [...tasks, newT];
 				originalTasksOrder = [...tasks];
 				sortTasks();
-
 				showModal = false;
-
-				form = {
-					title: '',
-					endDate: '',
-					category: '',
-					priority: 'Medium'
-				};
+				form = { title: '', endDate: '', category: '', priority: 'Medium' };
 			} else {
 				openModal(data.message || 'Failed to add task', 'error');
 			}
@@ -265,24 +167,21 @@
 			console.error(err);
 		}
 	}
-	// @ts-ignore
+
 	async function completeTask(taskId) {
 		try {
 			const res = await fetch(`http://localhost:3010/tasks/${taskId}/complete`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' }
 			});
-
 			const data = await res.json();
-
 			if (data.success) {
-				// Show unlocked achievements if any
-				if (data.unlockedAchievements && data.unlockedAchievements.length > 0) {
-					const achievementNames = data.unlockedAchievements.map((a) => a.name).join(', ');
-					openModal(`🎉 Achievement unlocked: ${achievementNames}!`, 'success');
+				if (data.unlockedAchievements?.length > 0) {
+					openModal(
+						`🎉 Achievement unlocked: ${data.unlockedAchievements.map((a) => a.name).join(', ')}!`,
+						'success'
+					);
 				}
-
-				// Reload tasks
 				await loadTasks();
 			} else {
 				openModal(data.message || 'Failed to complete task', 'error');
@@ -293,17 +192,15 @@
 		}
 	}
 
-	function openDetailModal(task) {
-		// Close any existing modal first to ensure only one is open
-		if (showDetailModal) {
-			closeDetailModal();
-		}
+	function openDetailModal(taskId) {
+		const task = tasks.find((t) => t.id === taskId);
+		if (!task) return;
 
 		selectedTask = {
 			...task,
 			notes: task.notes || '',
 			suggestions: task.suggestions || '',
-			subtasks: task.subtasks ? [...task.subtasks] : []
+			subtasks: [...(task.subtasks || [])]
 		};
 		showDetailModal = true;
 	}
@@ -312,14 +209,10 @@
 		showDetailModal = false;
 		selectedTask = null;
 	}
-
 	function addSubtask() {
 		if (!selectedTask) return;
-		if (!selectedTask.subtasks) {
-			selectedTask.subtasks = [];
-		}
 		selectedTask.subtasks = [
-			...selectedTask.subtasks,
+			...(selectedTask.subtasks || []),
 			{ id: Date.now(), text: '', completed: false }
 		];
 		selectedTask = { ...selectedTask };
@@ -344,7 +237,6 @@
 
 	async function saveTaskDetails() {
 		if (!selectedTask || !userId) return;
-
 		try {
 			const res = await fetch(`http://localhost:3010/tasks/${selectedTask.id}`, {
 				method: 'PUT',
@@ -355,9 +247,7 @@
 					subtasks: selectedTask.subtasks
 				})
 			});
-
 			const data = await res.json();
-
 			if (data.success) {
 				// update task in array
 				const taskIndex = tasks.findIndex(
@@ -406,115 +296,69 @@
 </script>
 
 <div class="min-h-screen bg-[#F8F3ED] p-4 font-serif sm:p-6">
-	<h1 class="mb-4 text-center text-3xl tracking-wide text-[#4F3117] sm:mb-6 sm:text-4xl">
+	<h1
+		class="mb-8 text-center font-['IM_Fell_Great_Primer_SC'] text-2xl tracking-wide text-[#4F3117] sm:text-3xl md:text-4xl"
+	>
 		Quest List
 	</h1>
 
-	<!-- Search Bar -->
+	<!-- Search -->
 	<div class="mb-4 sm:mb-6">
 		<input
 			type="text"
 			placeholder="Search tasks by name..."
 			bind:value={searchQuery}
-			class="w-full rounded-lg border border-[#4F3117] bg-white px-3 py-2 text-base text-[#4F3117] shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
+			class="w-full rounded-lg border border-[#4F3117] bg-white px-2 py-1 font-['Inter',sans-serif] text-sm shadow-sm focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:px-4 sm:py-2 sm:text-lg"
 		/>
 	</div>
 
-	<!-- Add Task Button and Sort Dropdown -->
-	<div class="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+	<!-- Add + Filter + Sort -->
+	<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 		<button
 			on:click={addTask}
-			class="w-full rounded-xl bg-[#F5E8D9] px-3 py-2 text-xl text-[#4F3117] shadow-md hover:opacity-70 sm:w-auto sm:px-4 sm:py-3 sm:text-2xl"
-		>
-			+ Add Quest
+			class="text-md w-full rounded-xl bg-[#F5E8D9] px-3 py-2 font-['Inter',sans-serif] font-semibold text-[#4F3117] shadow-md hover:opacity-70 sm:w-auto sm:px-4 sm:py-3 sm:text-lg"
+			>+ Add Quest
 		</button>
 
-		<!-- Interactive Filter Buttons -->
-		<div class="flex flex-wrap items-center gap-3">
-			<!-- Category Filter -->
+		<div class="flex flex-wrap items-center gap-2 font-['Inter',sans-serif] font-semibold sm:gap-3">
+			<!-- Category -->
 			<div class="flex flex-wrap gap-2">
-				<button
-					on:click={() => (filterByCategory = 'all')}
-					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory ===
-					'all'
-						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
-						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
-				>
-					All Categories
-				</button>
-				<button
-					on:click={() => (filterByCategory = 'study')}
-					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory ===
-					'study'
-						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
-						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
-				>
-					Study
-				</button>
-				<button
-					on:click={() => (filterByCategory = 'housework')}
-					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory ===
-					'housework'
-						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
-						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
-				>
-					Housework
-				</button>
-				<button
-					on:click={() => (filterByCategory = 'fitness')}
-					class="rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {filterByCategory ===
-					'fitness'
-						? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
-						: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
-				>
-					Fitness
-				</button>
+				{#each ['all', 'study', 'housework', 'fitness'] as cat}
+					<button
+						on:click={() => (filterByCategory = cat)}
+						class="rounded-lg border-2 px-3 py-1 text-sm font-medium transition-all sm:px-4 sm:py-2 sm:text-base {filterByCategory ===
+						cat
+							? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
+							: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
+						>{cat[0].toUpperCase() + cat.slice(1)}</button
+					>
+				{/each}
 			</div>
 
-			<!-- Sort by Priority Button -->
+			<!-- Sort -->
 			<button
 				on:click={toggleSortPriority}
-				class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white px-4 py-2 text-sm font-medium text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {sortByPriority !==
+				class="flex flex-1 items-center gap-1 rounded-lg border-2 border-[#4F3117] bg-white px-2 py-1 text-sm text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:flex-auto sm:px-4 sm:py-2 sm:text-base {sortByPriority !==
 				'none'
 					? 'bg-[#F5E8D9] shadow-md'
 					: ''}"
+				>Priority {sortByPriority === 'asc' ? '↑' : sortByPriority === 'desc' ? '↓' : '⇅'}</button
 			>
-				<span>Priority</span>
-				{#if sortByPriority === 'asc'}
-					<span class="text-lg">↑</span>
-				{:else if sortByPriority === 'desc'}
-					<span class="text-lg">↓</span>
-				{:else}
-					<span class="text-gray-400">⇅</span>
-				{/if}
-			</button>
-
-			<!-- Sort by Date Button -->
 			<button
 				on:click={toggleSortDate}
-				class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white px-4 py-2 text-sm font-medium text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-base {sortByDate !==
+				class="flex flex-1 items-center gap-1 rounded-lg border-2 border-[#4F3117] bg-white px-2 py-1 text-sm text-[#4F3117] transition-all hover:bg-[#F5E8D9] hover:opacity-80 sm:flex-auto sm:px-4 sm:py-2 sm:text-base {sortByDate !==
 				'none'
 					? 'bg-[#F5E8D9] shadow-md'
-					: ''}"
+					: ''}">Date {sortByDate === 'asc' ? '↑' : sortByDate === 'desc' ? '↓' : '⇅'}</button
 			>
-				<span>Date</span>
-				{#if sortByDate === 'asc'}
-					<span class="text-lg">↑</span>
-				{:else if sortByDate === 'desc'}
-					<span class="text-lg">↓</span>
-				{:else}
-					<span class="text-gray-400">⇅</span>
-				{/if}
-			</button>
 		</div>
 	</div>
-
-	<!-- Quest Table -->
-	<div class="overflow-x-auto">
+	<!-- desktop -->
+	<div class="hidden overflow-x-auto sm:block">
 		<table class="w-full border-separate border-spacing-y-2 sm:border-spacing-y-4">
-			<thead>
-				<tr class="text-lg text-[#4F3117] sm:text-xl">
-					<th class="px-2 py-2 text-left sm:px-4">Task</th>
+			<thead class="font-['Inter',sans-serif] text-lg font-semibold text-[#4F3117]">
+				<tr>
+					<th class="px-2 py-2 text-left sm:px-4">Quest</th>
 					<th class="px-2 py-2 text-left sm:px-4">End day</th>
 					<th class="px-2 py-2 text-left sm:px-4">Priority</th>
 					<th class="px-2 py-2 text-left sm:px-4">Status</th>
@@ -522,114 +366,170 @@
 					<th class="px-2 py-2 text-left sm:px-4">Actions</th>
 				</tr>
 			</thead>
-
 			<tbody>
-				{#if sortedTasks.length === 0}
-					<tr>
-						<td colspan="6" class="py-4 text-center text-gray-500"
-							>No quests found. Add one above!</td
-						>
-					</tr>
-				{:else}
-					{#each sortedTasks as task}
-						<tr class="rounded-xl bg-[#F4E9D8] shadow-md">
-							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.title}</td>
-							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.end}</td>
-							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
-								<span
-									class={task.priority === 'High'
-										? 'font-bold text-red-600'
-										: task.priority === 'Medium'
-											? 'text-orange-600'
-											: 'text-green-600'}
+				{#each sortedTasks as task}
+					<tr
+						class="rounded-xl bg-[#F4E9D8] font-['Inter',sans-serif] font-semibold text-[#4F3117] shadow-md"
+					>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.title}</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.end}</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">
+							<span
+								class={task.priority === 'High'
+									? 'font-bold text-red-600'
+									: task.priority === 'Medium'
+										? 'text-orange-600'
+										: 'text-green-600'}
+							>
+								{task.priority || 'Medium'}
+							</span>
+						</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.status}</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.category}</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">
+							<div class="flex flex-wrap items-center gap-2">
+								<button
+									on:click={() => openDetailModal(task.id)}
+									class="rounded bg-[#4F3117] px-3 py-1 text-sm font-normal text-white hover:bg-[#3E2612]"
+									>Details</button
 								>
-									{task.priority || 'Medium'}
-								</span>
-							</td>
-							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.status}</td>
-							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">{task.category}</td>
-							<td class="px-2 py-2 text-base sm:px-4 sm:py-3 sm:text-xl">
-								<div class="flex flex-wrap items-center gap-2">
+								{#if task.status !== 'Completed'}
 									<button
-										on:click={() => openDetailModal(task)}
-										class="rounded bg-[#4F3117] px-3 py-1 text-sm text-white transition-colors hover:bg-[#3E2612]"
+										on:click={() => completeTask(task.id)}
+										class="rounded bg-green-600 px-3 py-1 text-sm font-normal text-white hover:bg-green-700"
 									>
-										Details
-									</button>
-									{#if task.status !== 'Completed'}
-										<button
-											on:click={() => completeTask(task.id)}
-											class="rounded bg-green-600 px-3 py-1 text-white transition-colors hover:bg-green-700"
-										>
-											✓ Complete
-										</button>
-									{:else}
-										<span class="pl-4 text-green-600">✓ Done</span>
-									{/if}
-									<button
-										on:click={() => deleteTask(task.id)}
-										class="rounded px-3 py-1 pl-4 text-red-500 transition-colors hover:bg-red-100"
+										Complete</button
 									>
-										Delete
-									</button>
-								</div>
-							</td>
-						</tr>
-					{/each}
-				{/if}
+								{:else}
+									<span class="text-sm text-green-600">✓ Done</span>
+								{/if}
+								<button
+									on:click={() => deleteTask(task.id)}
+									class="rounded bg-red-600 px-3 py-1 text-sm font-normal text-white hover:bg-red-700"
+								>
+									Delete
+								</button>
+							</div>
+						</td>
+					</tr>
+				{/each}
 			</tbody>
 		</table>
+	</div>
+
+	<!-- mobile -->
+	<div class="flex flex-col gap-4 text-[#4F3117] sm:hidden">
+		{#each sortedTasks as task}
+			<div class="rounded-xl bg-[#F4E9D8] p-4 font-['Inter',sans-serif] font-semibold shadow-md">
+				<div class="mb-2 flex items-center justify-between">
+					<h3 class="text-lg text-[#4F3117]">{task.title}</h3>
+					<span
+						class={task.priority === 'High'
+							? 'text-red-600'
+							: task.priority === 'Medium'
+								? 'text-orange-600'
+								: 'text-green-600'}
+					>
+						{task.priority || 'Medium'}
+					</span>
+				</div>
+				<p class="text-sm">End: {task.end}</p>
+				<p class="text-sm">Status: {task.status}</p>
+				<p class="text-sm">Category: {task.category}</p>
+				<div class="mt-2 flex flex-wrap gap-2">
+					<button
+						on:click={() => openDetailModal(task.id)}
+						class="rounded bg-[#4F3117] px-3 py-1 text-sm font-normal text-white hover:bg-[#3E2612]"
+						>Details</button
+					>
+					{#if task.status !== 'Completed'}
+						<button
+							on:click={() => completeTask(task.id)}
+							class="rounded bg-green-600 px-3 py-1 text-sm font-normal text-white hover:bg-green-700"
+						>
+							Complete</button
+						>
+					{:else}
+						<span class="text-sm text-green-600">✓ Done</span>
+					{/if}
+				</div>
+			</div>
+		{/each}
 	</div>
 </div>
 
 <!-- Modal -->
 {#if showModal}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-		<div class="w-80 rounded-xl bg-white p-6 shadow-lg">
-			<h2 class="mb-4 font-serif text-xl text-[#4F3117]">Create New Task</h2>
-
-			<input
-				type="text"
-				placeholder="Task Name"
-				class="mb-3 w-full rounded border p-2"
-				bind:value={form.title}
-			/>
-			<button
-				type="button"
-				on:click={openCalendar}
-				class="mb-3 flex w-full items-center justify-between rounded border p-2 text-left text-gray-700"
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2">
+		<div
+			class="w-full max-w-[90vw] overflow-hidden rounded-xl border-6 border-double border-[#ad8a6c] bg-[#fdf3e7] font-['IM_Fell_Great_Primer_SC'] shadow-[0_0_20px_rgba(0,0,0,0.5)] md:w-[520px]"
+		>
+			<!-- Header -->
+			<div
+				class="flex items-center justify-between border-b-2 border-[#ad8a6c] px-4 py-3 text-[#4F3117]"
 			>
-				<span>{form.endDate || 'Pick a date'}</span>
-				<span>📅</span>
-			</button>
-
-			<label for="priority" class="mb-1 block text-sm text-gray-600">Priority</label>
-			<select id="priority" class="mb-3 w-full rounded border p-2" bind:value={form.priority}>
-				<option value="Low">Low</option>
-				<option value="Medium">Medium</option>
-				<option value="High">High</option>
-			</select>
-
-			<label for="category" class="mb-1 block text-sm text-gray-600">Category</label>
-			<select id="category" class="mb-3 w-full rounded border p-2" bind:value={form.category}>
-				<option value="">Select Category</option>
-				<option value="Study">Study</option>
-				<option value="Work">Work</option>
-				<option value="Chores">Chores</option>
-				<option value="Health">Health</option>
-				<option value="Reading">Reading</option>
-			</select>
-
-			<div class="mt-4 flex gap-2">
-				<button class="flex-1 rounded-lg bg-[#F5E8D9] py-2 text-[#4F3117]" on:click={submitTask}>
-					Submit
-				</button>
+				<h2 class="text-xl sm:text-2xl">Create New Task</h2>
 				<button
-					class="flex-1 rounded-lg bg-gray-300 py-2 text-[#4F3117]"
 					on:click={() => (showModal = false)}
+					class="text-xl transition-transform hover:rotate-12">✖</button
 				>
-					Cancel
-				</button>
+			</div>
+			<!-- Content -->
+			<div class="space-y-3 p-4 text-[#4F3117] sm:space-y-4 sm:p-6">
+				<input
+					type="text"
+					placeholder="Task Name"
+					bind:value={form.title}
+					class="w-full rounded border-2 bg-[#fff8e1] p-2 text-base focus:outline-none sm:text-lg {formError
+						? 'border-red-600 focus:ring-2 focus:ring-red-400'
+						: 'border-[#ad8a6c] focus:ring-2 focus:ring-[#ad8a6c]'}"
+				/>
+				{#if formError}<p class="text-sm text-red-600">{formError}</p>{/if}
+				<button
+					type="button"
+					on:click={openCalendar}
+					class="flex w-full justify-between rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-2 text-base hover:bg-[#f1e0c5] sm:p-3 sm:text-lg"
+					>{form.endDate || 'Pick a date'} <span>📅</span></button
+				>
+				<div>
+					<label class="mb-1 block text-sm" for="priority">Priority</label>
+					<select
+						id="priority"
+						bind:value={form.priority}
+						class="w-full rounded border-2 bg-[#fff8e1] p-2 text-base sm:text-lg"
+					>
+						<option value="Low">Low</option>
+						<option value="Medium">Medium</option>
+						<option value="High">High</option>
+					</select>
+				</div>
+				<div>
+					<label class="mb-1 block text-sm" for="category">Category</label>
+					<select
+						id="category"
+						bind:value={form.category}
+						class="w-full rounded border-2 bg-[#fff8e1] p-2 text-base sm:text-lg"
+					>
+						<option value="">Select Category</option>
+						<option value="Study">Study</option>
+						<option value="Work">Work</option>
+						<option value="Chores">Chores</option>
+						<option value="Health">Health</option>
+						<option value="Reading">Reading</option>
+					</select>
+				</div>
+				<div class="mt-4 flex flex-col gap-3 sm:flex-row">
+					<button
+						class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] py-2 text-lg hover:bg-[#f1e0c5] sm:text-base"
+						on:click={submitTask}>Submit</button
+					>
+					<button
+						class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#e0d3c2] py-2 text-lg hover:bg-[#d2c1aa] sm:text-base"
+						on:click={() => (showModal = false)}
+					>
+						Cancel
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
