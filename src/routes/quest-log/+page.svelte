@@ -501,7 +501,7 @@
 		<table class="w-full border-separate border-spacing-y-2 sm:border-spacing-y-4">
 			<thead>
 				<tr class="text-lg text-[#4F3117] sm:text-xl">
-					<th class="px-2 py-2 text-left sm:px-4">Task</th>
+					<th class="px-2 py-2 text-left sm:px-4">Quest</th>
 					<th class="px-2 py-2 text-left sm:px-4">End day</th>
 					<th class="px-2 py-2 text-left sm:px-4">Priority</th>
 					<th class="px-2 py-2 text-left sm:px-4">Status</th>
