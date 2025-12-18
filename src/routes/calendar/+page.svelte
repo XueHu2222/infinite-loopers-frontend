@@ -9,6 +9,23 @@
 	let tasks = [];
 	let userId = null;
 	let isSelectingDate = sessionStorage.getItem('isSelectingDate') === 'true';
+	
+	const STATUS = {
+		COMPLETED: 'Completed',
+		IN_PROGRESS: 'In Progress',
+		NOT_STARTED: 'Not Started'
+	};
+
+	function getEventColor(status) {
+		switch (status) {
+			case STATUS.COMPLETED:
+				return '#4CAF50';
+			case STATUS.IN_PROGRESS:
+				return '#F4B942';
+			default:
+				return '#D8CFC4';
+		}
+	}
 
 	onMount(() => {
 		const storedUser = localStorage.getItem('user');
@@ -33,7 +50,8 @@
 					title: task.title,
 					endDate: task.endDate,
 					category: task.category,
-					priority: task.priority
+					priority: task.priority,
+					status: task.status
 				}));
 				renderCalendar();
 			} else {
@@ -45,12 +63,19 @@
 	}
 
 	function renderCalendar() {
-		const events = tasks.map((task) => ({
-			id: task.id,
-			title: task.title,
-			start: task.endDate,
-			allDay: true
-		}));
+		const events = tasks.map((task) => {
+			const color = getEventColor(task.status);
+
+			return {
+				id: task.id,
+				title: task.title,
+				start: task.endDate,
+				allDay: true,
+				backgroundColor: color,
+				borderColor: color,
+				textColor: '#2E1C0E'
+			};
+		});
 
 		const calendar = new Calendar(calendarEl, {
 			plugins: [dayGridPlugin, interactionPlugin],
@@ -75,9 +100,5 @@
 </script>
 
 <section class="bg-[#FAF6F0] px-6 py-12 sm:px-12 lg:px-28">
-	<h2 class="mb-8 text-center font-['IM_Fell_Great_Primer_SC'] text-4xl text-[#4F3117]">
-		Calendar
-	</h2>
-
-	<div bind:this={calendarEl} class="rounded-lg bg-[#EEE9E1] p-4 shadow-lg"></div>
+	<div bind:this={calendarEl} class="rounded-lg bg-[#EEE9E1] p-4 font-serif shadow-lg"></div>
 </section>
