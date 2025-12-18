@@ -1,4 +1,5 @@
 <script>
+	import { openModal, isOpen } from '../../modalStore.js';
 	let username = '';
 	let email = '';
 	let password = '';
@@ -16,7 +17,7 @@
 		errorMessage = '';
 
 		try {
-			const response = await fetch('http://localhost:3011/auth/register', {
+			const response = await fetch('http://localhost:3012/auth/register', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -36,8 +37,13 @@
 			const data = await response.json();
 
 			if (data.success) {
-				alert('Registration successful! Please sign in.');
-				window.location.href = '/signin';
+				openModal('Registration successful! Please sign in.', 'success');
+				const unsubscribe = isOpen.subscribe(open => {
+    				if (!open) {
+      					window.location.href = '/signin';
+      					unsubscribe();
+    				}
+  			});
 			} else {
 				errorMessage = data.message || 'Registration failed';
 			}
