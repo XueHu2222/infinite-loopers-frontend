@@ -23,20 +23,27 @@
 		}
 	});
 
-	function finishTour() {
+	function nextToStep3() {
+		tourStep = 3;
+	}
+
+	async function finishTour() {
 		tourStep = 0;
 		window.history.replaceState({}, '', window.location.pathname);
-		localStorage.setItem('tour_finished', 'true');
+
+		await fetch('http://localhost:3011/users/finish-tour', {
+			method: 'PATCH',
+			credentials: 'include'
+		});
 	}
 </script>
 
-{#if tourStep === 2}
-	<button
-		type="button"
-		class="fixed inset-0 z-40 h-full w-full cursor-default border-none bg-black/60 backdrop-blur-[2px]"
-		onclick={finishTour}
-		aria-label="Close tutorial"
-	></button>
+{#if tourStep === 2 || tourStep === 3}
+	<div
+		class="backdrop-blur-2px fixed inset-0 z-40 bg-black/60"
+		onclick={closeTour}
+		role="presentation"
+	></div>
 {/if}
 
 <section
@@ -72,13 +79,44 @@
 		{/each}
 	</div>
 
-	<button
-		onclick={() => (showModal = true)}
-		class="absolute bottom-0 left-1/2 z-10 flex h-30 w-58 -translate-x-1/2 translate-y-1/2 cursor-pointer items-center justify-center font-['IM_Fell_Great_Primer_SC'] text-2xl tracking-[-0.5%] text-[#5a3e1b] transition-colors duration-100 hover:text-[#B69476] sm:h-40 sm:w-78 sm:text-3xl md:text-4xl"
-		style="background-image: url({focusButton}); background-size: contain; background-position: center; background-repeat: no-repeat;"
-	>
-		Focus Now
-	</button>
+	<div class="relative">
+		<button
+			onclick={() => (showModal = true)}
+			class="absolute bottom-0 left-1/2 flex h-30 w-58 -translate-x-1/2 translate-y-1/2 cursor-pointer items-center justify-center font-['IM_Fell_Great_Primer_SC'] text-2xl tracking-[-0.5%] text-[#5a3e1b] transition-colors duration-100 hover:text-[#B69476] sm:h-40 sm:w-78 sm:text-3xl md:text-4xl
+  {tourStep === 3 ? 'quest-log-active z-50 shadow-[0_0_50px_rgba(255,255,255,0.6)]' : 'z-10'}"
+			style="background-image: url({focusButton}); background-size: contain; background-position: center; background-repeat: no-repeat;"
+		>
+			Focus Now
+		</button>
+
+		{#if tourStep === 3}
+			<div
+				transition:fly={{ y: 20, duration: 600 }}
+				class="absolute top-full left-1/2 z-60 mt-24 w-[350px] -translate-x-1/2"
+			>
+				<div
+					class="border-x-15px border-b-15px mx-auto h-0 w-0 border-x-transparent border-b-[#4F3117]"
+				></div>
+
+				<div
+					class="rounded-xl border-4 border-[#4F3117] bg-[#EEE9E1] p-8 text-center font-['IM_Fell_Great_Primer_SC'] shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
+				>
+					<h3 class="mb-3 text-2xl font-bold text-[#4F3117]">Ready for Battle?</h3>
+					<p class="mb-6 text-lg leading-relaxed text-[#5A3E1B]">
+						This is where your journey truly begins. Click <span
+							class="mx-0.5 rounded-sm bg-[#4F3117] px-1 text-[#EEE9E1]">Focus Now</span
+						> to start your timer and complete your first quest!
+					</p>
+					<button
+						class="cursor-pointer rounded-lg bg-[#4F3117] px-8 py-3 text-lg font-bold text-[#EEE9E1] shadow-md transition-transform hover:scale-105 hover:bg-[#3E2612]"
+						onclick={finishTour}
+					>
+						Start My Journey
+					</button>
+				</div>
+			</div>
+		{/if}
+	</div>
 </section>
 
 <ChooseQuest tasks={data.tasks} bind:showModal />
@@ -90,7 +128,7 @@
 		<div
 			class="flex flex-col gap-3 rounded-xl p-2 transition-all duration-300
           {tourStep === 2
-				? 'quest-log-active relative z-[50] border-2 border-[#4F3117] bg-[#EEE9E1]/40 shadow-[0_0_40px_rgba(255,255,255,0.4)]'
+				? 'quest-log-active relative z-50 border-2 border-[#4F3117] bg-[#EEE9E1]/40 shadow-[0_0_40px_rgba(255,255,255,0.4)]'
 				: ''}"
 		>
 			<a
@@ -111,10 +149,10 @@
 		{#if tourStep === 2}
 			<div
 				transition:fly={{ x: 20, duration: 600 }}
-				class="absolute top-0 left-full z-[60] ml-10 w-[350px]"
+				class="absolute top-0 left-full z-60 ml-10 w-[350px]"
 			>
 				<div
-					class="absolute top-10 -left-4 h-0 w-0 border-y-[15px] border-r-[15px] border-y-transparent border-r-[#4F3117]"
+					class="border-y-15px border-r-15px absolute top-10 -left-4 h-0 w-0 border-y-transparent border-r-[#4F3117]"
 				></div>
 
 				<div
@@ -124,17 +162,18 @@
 						Customization & Collection
 					</h3>
 					<p class="mb-6 text-lg leading-relaxed text-[#5A3E1B]">
-						Personalize your character and room! Earn coins by completing your <span
-							class="font-bold text-[#4F3117]">Quests</span
-						>, then spend them at the <span class="font-bold text-[#4F3117]">Shop</span> to unlock new
-						outfits and items.
+						Personalize your character and room! Earn coins by completing your
+						<span class="mx-0.5 rounded-sm bg-[#4F3117] px-1 text-[#EEE9E1]">Quests</span>, then
+						spend them at the
+						<span class="mx-0.5 rounded-sm bg-[#4F3117] px-1 text-[#EEE9E1]">Shop</span>
+						to unlock new outfits and items.
 					</p>
 					<div class="flex justify-end">
 						<button
 							class="cursor-pointer rounded-lg bg-[#4F3117] px-6 py-2 text-lg font-bold text-[#EEE9E1] shadow-md transition-transform hover:scale-105 hover:bg-[#3E2612]"
-							onclick={finishTour}
+							onclick={nextToStep3}
 						>
-							Got it!
+							Next Step
 						</button>
 					</div>
 				</div>

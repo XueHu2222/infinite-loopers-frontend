@@ -15,14 +15,29 @@
 	}
 
 	let user = $state(null);
+	let tourStep = $state(0);
 
-	// Check if user is logged in when component mounts
-	onMount(() => {
+	onMount(async () => {
 		const storedUser = localStorage.getItem('user');
-		if (storedUser) {
-			user = JSON.parse(storedUser);
+		if (!storedUser) return;
+
+		user = JSON.parse(storedUser);
+
+		const res = await fetch('http://localhost:3011/users/status', {
+			credentials: 'include'
+		});
+
+		const data = await res.json();
+
+		if (!data.hasFinishedTour) {
+			tourStep = 1;
 		}
 	});
+
+	function goToStep2() {
+		tourStep = 0;
+		goto('/home?step=2');
+	}
 
 	// Logout function
 	async function handleLogout() {
@@ -40,25 +55,9 @@
 			console.error('Logout failed', err);
 		}
 	}
-
-	let tourStep = $state(0);
-
-	onMount(() => {
-		// If the user is logged in and has never finished the tour
-		// const tourFinished = localStorage.getItem('tour_finished');
-		// if (user && !tourFinished) {
-		if (user) {
-			tourStep = 1;
-		}
-	});
-
-	function goToStep2() {
-        tourStep = 0;
-        goto('/home?step=2');
-    }
 </script>
 
-<header class="relative z-[45] bg-[#EEE9E1] px-4 py-3 sm:px-8 sm:py-5">
+<header class="relative z-45 bg-[#EEE9E1] px-4 py-3 sm:px-8 sm:py-5">
 	<section class="flex items-center justify-between">
 		<a
 			href={user ? '/home' : '/'}
@@ -75,50 +74,61 @@
 		>
 			{#if user}
 				{#each items as item}
-    <div class="relative inline-block"> <a
-            id={item.label === 'Quest Log' ? 'step-1-quest-log' : ''}
-            href={item.href}
-            class="px-2 transition-all duration-300
+					<div class="relative inline-block">
+						<a
+							id={item.label === 'Quest Log' ? 'step-1-quest-log' : ''}
+							href={item.href}
+							class="px-2 transition-all duration-300
             {currentPath === item.href ? 'font-semibold' : ''}
             {tourStep === 1 && item.label === 'Quest Log'
-                ? 'quest-log-active relative z-[60]'
-                : 'z-10 text-[#4F3117] hover:text-[#7A5C3E]'}"
-        >
-            {item.label}
-        </a>
+								? 'quest-log-active relative z-60'
+								: 'z-10 text-[#4F3117] hover:text-[#7A5C3E]'}"
+						>
+							{item.label}
+						</a>
 
-        {#if tourStep === 1 && item.label === 'Quest Log'}
-    <div 
-        class="absolute left-1/2 top-full mt-5 -translate-x-1/2 z-[70] w-80 animate-in fade-in zoom-in duration-300"
-    >
-        <div class="mx-auto h-0 w-0 border-x-[12px] border-x-transparent border-b-[12px] border-b-[#4F3117]"></div>
-        
-        <div class="rounded-xl border-4 border-[#4F3117] bg-[#EEE9E1] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] font-['IM_Fell_Great_Primer_SC']">
-            <h3 class="mb-3 flex items-center gap-2 text-2xl font-bold text-[#4F3117] tracking-tight">
-                📜 Quest Call
-            </h3>
-            
-            <p class="mb-6 text-lg leading-relaxed text-[#5A3E1B]">
-                Dear adventurer, this is the <span class="font-bold text-[#4F3117]">starting point</span> of your journey. 
-                You can enter Quest Log to set up your first focused goal!
-            </p>
-            
-            <div class="flex justify-end">
-                <button
-                    class="rounded-lg bg-[#4F3117] px-5 py-2 text-base font-bold text-[#EEE9E1] hover:bg-[#3E2612] transition-colors cursor-pointer shadow-md"
-                    onclick={(e) => {
-                        e.preventDefault();
-                        goToStep2();
-                    }}
-                >
-                    Next Step
-                </button>
-            </div>
-        </div>
-    </div>
-{/if}
-    </div>
-{/each}
+						{#if tourStep === 1 && item.label === 'Quest Log'}
+							<div
+								class="animate-in fade-in zoom-in absolute top-full left-1/2 z-70 mt-5 w-80 -translate-x-1/2 duration-300"
+							>
+								<div
+									class="border-x-12px border-b-12px mx-auto h-0 w-0 border-x-transparent border-b-[#4F3117]"
+								></div>
+
+								<div
+									class="rounded-xl border-4 border-[#4F3117] bg-[#EEE9E1] p-6 font-['IM_Fell_Great_Primer_SC'] shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+								>
+									<h3
+										class="mb-3 flex items-center gap-2 text-2xl font-bold tracking-tight text-[#4F3117]"
+									>
+										📜 Quest Call
+									</h3>
+
+									<p class="mb-6 text-lg leading-relaxed text-[#5A3E1B]">
+										Dear adventurer, this is the <span class="font-bold text-[#4F3117]"
+											>starting point</span
+										>
+										of your journey. You can enter
+										<span class="mx-0.5 rounded-sm bg-[#4F3117] px-1 text-[#EEE9E1]">Quest Log</span
+										> to set up your first focused goal!
+									</p>
+
+									<div class="flex justify-end">
+										<button
+											class="cursor-pointer rounded-lg bg-[#4F3117] px-5 py-2 text-base font-bold text-[#EEE9E1] shadow-md transition-colors hover:bg-[#3E2612]"
+											onclick={(e) => {
+												e.preventDefault();
+												goToStep2();
+											}}
+										>
+											Next Step
+										</button>
+									</div>
+								</div>
+							</div>
+						{/if}
+					</div>
+				{/each}
 
 				<span class="font-medium text-[#4F3117]">
 					Welcome, {user['username']}!
@@ -218,8 +228,13 @@
 		</section>
 	{/if}
 </header>
+
 {#if tourStep === 1}
-    <div class="fixed inset-0 z-40 bg-black/60 backdrop-blur-[2px]" onclick={closeTour}></div>
+	<div
+		class="backdrop-blur-2px fixed inset-0 z-40 bg-black/60"
+		onclick={closeTour}
+		role="presentation"
+	></div>
 {/if}
 
 <style>
